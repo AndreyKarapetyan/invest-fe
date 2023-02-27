@@ -1,0 +1,14 @@
+version: 1
+frontend:
+  appRoot: invest-fe
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    files:
+        - '**/*'
+    baseDirectory: dist/invest-fe
