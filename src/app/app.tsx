@@ -1,27 +1,22 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import styles from './app.module.scss';
-
-import NxWelcome from './nx-welcome';
-
 import { Route, Routes, Link } from 'react-router-dom';
 import Login from './screens/Login';
+import { AdminHome } from './screens/admin/AdminHome';
+import { Box } from '@mui/system';
+import { AdminRoute } from './components/admin/AdminRoute';
 
 export function App() {
   return (
-      <Routes>
-        <Route
-          path="/login"
-          element={<Login/>}
-        />
-        <Route
-          path="/page-2"
-          element={
-            <div>
-              <Link to="/">Click here to go back to root page.</Link>
-            </div>
-          }
-        />
-      </Routes>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/"
+        element={
+          <AdminRoute>
+            <AdminHome/>
+          </AdminRoute>
+        }
+      />
+    </Routes>
   );
 }
 
