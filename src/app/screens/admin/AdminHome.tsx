@@ -1,54 +1,73 @@
-// import React, { useState } from 'react';
-// import { FixedSizeList as List } from 'react-window';
-// import InfiniteLoader from 'react-window-infinite-loader';
-// import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Box, Button, Fade, LinearProgress } from '@mui/material';
+import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
+import { useEffect, useState } from 'react';
+import { useGetBranches, useGetStudents } from './hooks';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 
-// const ROW_HEIGHT = 50;
+const columns = [{ name: 'id' }, { name: 'name' }, { name: 'lastname' }];
 
-export function AdminHome() {
-  // const [items, setItems] = useState([]);
-  // const [hasMoreItems, setHasMoreItems] = useState(true);
-  // const loadMoreItems = (startIndex, stopIndex) => {
-  //   // Your API call to get more data
-  //   // Add the new items to the `items` array
-  //   // If there is no more data, set `hasMoreItems` to false
-  // };
+export const AdminHome = () => {
+  const { branches, branchesLoading, getBranches } = useGetBranches();
+  const [currentBranch, setCurrentBranch] = useState(null);
+  const { students, studentsLoading, hasMore, getStudents } =
+    useGetStudents();
 
-  // const isItemLoaded = (index) => {
-  //   return index < items.length;
-  // };
+  const handleBranchChange = (event: any, branch: any) => {
+    setCurrentBranch(branch);
+  };
 
-  // const itemCount = hasMoreItems ? items.length + 1 : items.length;
+  const loadMore = () => {
+    getStudents(currentBranch);
+  };
 
-  // return (
-  //   <InfiniteLoader
-  //     isItemLoaded={isItemLoaded}
-  //     itemCount={itemCount}
-  //     loadMoreItems={loadMoreItems}
-  //   >
-  //     {({ onItemsRendered, ref }: any) => (
-  //       <Table>
-  //         <TableHead>
-  //           <TableRow>
-  //             <TableCell>Header 1</TableCell>
-  //             <TableCell>Header 2</TableCell>
-  //             <TableCell>Header 3</TableCell>
-  //           </TableRow>
-  //         </TableHead>
-  //         <TableBody component={List} ref={ref} onItemsRendered={onItemsRendered}>
-  //           {(({ index, style }: any) => {
-  //             const item = items[index];
-  //             return (
-  //               <TableRow key={item.id} style={style}>
-  //                 <TableCell>{item.data1}</TableCell>
-  //                 <TableCell>{item.data2}</TableCell>
-  //                 <TableCell>{item.data3}</TableCell>
-  //               </TableRow>
-  //             );
-  //           })()}
-  //         </TableBody>
-  //       </Table>
-  //     )}
-  //   </InfiniteLoader>
-  // );
-}
+  useEffect(() => {
+    if (branches.length && !currentBranch) {
+      setCurrentBranch(branches[0].name);
+    }
+    if (currentBranch) {
+      getStudents(currentBranch, true);
+    }
+  }, [branches, currentBranch]);
+
+  useEffect(() => {
+    getBranches();
+  }, []);
+
+  return (
+    <Box sx={{ maxWidth: '600px', maxHeight: '90vh', margin: 'auto' }}>
+      <br></br>
+      {currentBranch && (
+        <Tabs
+          value={currentBranch}
+          onChange={handleBranchChange}
+          textColor="secondary"
+          indicatorColor="secondary"
+          aria-label="secondary tabs example"
+        >
+          {branches.map(({ name }) => (
+            <Tab key={name} value={name} label={name} />
+          ))}
+        </Tabs>
+      )}
+      <br></br>
+      {studentsLoading && (
+        <Fade
+          in={studentsLoading}
+          style={{
+            transitionDelay: studentsLoading ? '800ms' : '0ms',
+          }}
+          unmountOnExit
+        >
+          <LinearProgress />
+        </Fade>
+      )}
+      <InfiniteLoadingTable
+        columns={columns}
+        rows={students}
+        loadMore={loadMore}
+        hasMore={hasMore}
+      />
+    </Box>
+  );
+};
