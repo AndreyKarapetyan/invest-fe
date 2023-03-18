@@ -58,7 +58,7 @@ export function InfiniteLoadingTable({
 
   return (
     <TableContainer
-      sx={{ maxWidth: 'inherit', maxHeight: 'inherit', margin: 'auto' }}
+      sx={{ maxWidth: 'inherit', maxHeight: '70vh', margin: 'auto'}}
       ref={tableEl}
     >
       <Table stickyHeader>

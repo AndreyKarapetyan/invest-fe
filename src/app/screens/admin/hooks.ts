@@ -18,11 +18,13 @@ export function useGetStudents() {
     (async function () {
       try {
         setLoading(true);
-        const { data: response } = await Api.get(
-          `/students/superadmin/${branchName}`,
-          { qs: { take, skip: isReset ? 0 : skip } }
-        );
-        const newData = isReset ? response.data: data.concat(response.data);
+        const { data: response } = await Api.get(`/students/superadmin`, {
+          qs: {
+            pagination: { take, skip: isReset ? 0 : skip },
+            branch: { branchName },
+          },
+        });
+        const newData = isReset ? response.data : data.concat(response.data);
         setData(newData);
         setSkip((skip) => skip + take);
         setHasMore(newData.length < response.count);
@@ -38,7 +40,7 @@ export function useGetStudents() {
     setSkip(0);
     setHasMore(true);
     setData([]);
-  }
+  };
 
   return {
     students: data,
@@ -73,5 +75,33 @@ export function useGetBranches() {
     branchesError: error,
     branchesLoading: loading,
     getBranches,
+  };
+}
+
+export function useGetTeachers() {
+  const [data, setData] = useState<any[]>([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const getTeachers = (branchName: string) => {
+    (async function () {
+      try {
+        setLoading(true);
+        const { data: newData } = await Api.get(`/teachers/superadmin`, {
+          qs: { branch: { branchName } },
+        });
+        setData(newData);
+      } catch (err: any) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+  return {
+    teachers: data,
+    teachersError: error,
+    teachersLoading: loading,
+    getTeachers,
   };
 }
