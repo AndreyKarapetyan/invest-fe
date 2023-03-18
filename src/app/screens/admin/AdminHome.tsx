@@ -16,35 +16,12 @@ import {
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { StudentDialog } from 'src/app/components/StudentDialog';
 import { cloneElement, Fragment, useEffect, useState } from 'react';
-import { useGetBranches, useGetStudents, useGetTeachers } from './hooks';
+import { useGetBranches, useGetStudents, useGetTeacherGroups, useGetTeachers } from './hooks';
 import { TextField } from '@mui/material';
 import { Search } from '@mui/icons-material';
+import AddIcon from '@mui/icons-material/Add';
 
 const columns = [{ name: 'id' }, { name: 'name' }, { name: 'lastname' }];
-
-export const StyledTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(() => ({
-  '& .MuiTooltip-tooltip': {
-    fontWeight: 900,
-  },
-}));
-
-export function StyledIcon(props: any) {
-  return (
-    <StyledTooltip
-      title={props.tooltipTitle}
-      placement={props.placement}
-      enterDelay={500}
-    >
-      <IconButton onClick={props.onClick} size="large">
-        {cloneElement(props.children, {
-          fontSize: props.fontSize || 'medium',
-        })}
-      </IconButton>
-    </StyledTooltip>
-  );
-}
 
 const SearchField = styled(TextField)({
   width: '60vh',
@@ -68,12 +45,12 @@ const SearchField = styled(TextField)({
 });
 
 export const AdminHome = () => {
-  const { branches, branchesLoading, getBranches } = useGetBranches();
   const [currentBranch, setCurrentBranch] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { branches, branchesLoading, getBranches } = useGetBranches();
   const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
   const { teachers, teachersLoading, getTeachers } = useGetTeachers();
-
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const { groups, groupsLoading, getTeacherGroups } = useGetTeacherGroups();
 
   const handleBranchChange = (_event: any, branch: any) => {
     setCurrentBranch(branch);
@@ -88,8 +65,9 @@ export const AdminHome = () => {
   };
 
   const handleDialogOpen = () => {
+    getTeachers(currentBranch);
     setDialogOpen(true);
-  }
+  };
 
   useEffect(() => {
     if (branches.length && !currentBranch) {
@@ -105,83 +83,90 @@ export const AdminHome = () => {
   }, []);
 
   return (
-    <Fragment>
-      <Box
+    <Box
+      sx={{
+        width: '80%',
+        maxHeight: '90vh',
+        marginX: 'auto',
+        marginTop: 3,
+      }}
+    >
+      <StudentDialog
+        isOpen={dialogOpen}
+        handleClose={handleDialogClose}
+        teachers={teachers}
+        teachersLoading={teachersLoading}
+        groups={groups}
+        groupsLoading={groupsLoading}
+        getTeacherGroups={getTeacherGroups}
+      />
+      {currentBranch && (
+        <Tabs
+          sx={{ display: 'flex', justifyContent: 'center' }}
+          value={currentBranch}
+          onChange={handleBranchChange}
+          textColor="secondary"
+          indicatorColor="secondary"
+          aria-label="secondary tabs example"
+        >
+          {branches.map(({ name }) => (
+            <Tab key={name} value={name} label={name} sx={{ flexGrow: 1 }} />
+          ))}
+        </Tabs>
+      )}
+      <Grid
         sx={{
-          width: '80%',
-          maxHeight: '90vh',
-          marginX: 'auto',
-          marginTop: 3,
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
-        {<StudentDialog isOpen={dialogOpen} handleClose={handleDialogClose} />}
-        {currentBranch && (
-          <Tabs
-            sx={{ display: 'flex', justifyContent: 'center' }}
-            value={currentBranch}
-            onChange={handleBranchChange}
-            textColor="secondary"
-            indicatorColor="secondary"
-            aria-label="secondary tabs example"
-          >
-            {branches.map(({ name }) => (
-              <Tab key={name} value={name} label={name} sx={{ flexGrow: 1 }} />
-            ))}
-          </Tabs>
-        )}
-        <Grid
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+        <SearchField
+          sx={{ marginY: 3, marginX: 2 }}
+          placeholder="Search..."
+          variant="outlined"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
           }}
-        >
-          <SearchField
-            sx={{ marginY: 3, marginX: 2 }}
-            placeholder="Search..."
-            variant="outlined"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Button
-            sx={{
-              marginY: 3,
-              marginX: 2,
-              padding: 1,
-              width: '200px',
-              flexShrink: 0,
-              whiteSpace: 'nowrap',
-            }}
-            variant="outlined"
-            onClick={handleDialogOpen}
-          >
-            New Student
-          </Button>
-        </Grid>
-        {studentsLoading && (
-          <Fade
-            in={studentsLoading}
-            style={{
-              transitionDelay: studentsLoading ? '800ms' : '0ms',
-            }}
-            unmountOnExit
-          >
-            <LinearProgress />
-          </Fade>
-        )}
-        <InfiniteLoadingTable
-          columns={columns}
-          rows={students}
-          loadMore={loadMore}
-          hasMore={hasMore}
         />
-      </Box>
-    </Fragment>
+        <Button
+          sx={{
+            marginY: 3,
+            marginX: 2,
+            paddingY: 1,
+            width: '200px',
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}
+          variant="outlined"
+          onClick={handleDialogOpen}
+          startIcon={<AddIcon />}
+        >
+          New Student
+        </Button>
+      </Grid>
+      {studentsLoading && (
+        <Fade
+          in={studentsLoading}
+          style={{
+            transitionDelay: studentsLoading ? '800ms' : '0ms',
+          }}
+          unmountOnExit
+        >
+          <LinearProgress />
+        </Fade>
+      )}
+      <InfiniteLoadingTable
+        columns={columns}
+        rows={students}
+        loadMore={loadMore}
+        hasMore={hasMore}
+      />
+    </Box>
   );
 };

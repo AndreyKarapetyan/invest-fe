@@ -9,7 +9,7 @@ export function useGetStudents() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const getStudents = (branchName: any, isReset = false) => {
+  const getStudents = (branchName: null | string, isReset = false) => {
     if (isReset) {
       setSkip(0);
       setHasMore(true);
@@ -70,6 +70,7 @@ export function useGetBranches() {
       }
     })();
   };
+
   return {
     branches: data,
     branchesError: error,
@@ -83,12 +84,12 @@ export function useGetTeachers() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const getTeachers = (branchName: string) => {
+  const getTeachers = (branchName: null | string) => {
     (async function () {
       try {
         setLoading(true);
         const { data: newData } = await Api.get(`/teachers/superadmin`, {
-          qs: { branch: { branchName } },
+          qs: { branchName },
         });
         setData(newData);
       } catch (err: any) {
@@ -98,10 +99,40 @@ export function useGetTeachers() {
       }
     })();
   };
+
   return {
     teachers: data,
     teachersError: error,
     teachersLoading: loading,
     getTeachers,
+  };
+}
+
+export function useGetTeacherGroups() {
+  const [data, setData] = useState<any[]>([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const getTeacherGroups = (teacherId: number) => {
+    (async function () {
+      try {
+        setLoading(true);
+        const { data: newData } = await Api.get(`/groups`, {
+          qs: { teacherId },
+        });
+        setData(newData);
+      } catch (err: any) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
+  return {
+    groups: data,
+    groupsError: error,
+    groupsLoading: loading,
+    getTeacherGroups,
   };
 }
