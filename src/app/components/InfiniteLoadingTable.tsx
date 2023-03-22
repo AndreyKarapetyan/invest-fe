@@ -17,6 +17,7 @@ export function InfiniteLoadingTable({
   columns,
   rows,
   onEdit,
+  onDelete,
   loadMore,
   isLoading,
   hasMore,
@@ -80,7 +81,7 @@ export function InfiniteLoadingTable({
               </TableCell>
               <TableCell>
                 <Tooltip title="Delete">
-                  <IconButton onClick={() => {}} size="small">
+                  <IconButton onClick={() => onDelete(row.id)} size="small">
                     <DeleteIcon />
                   </IconButton>
                 </Tooltip>
