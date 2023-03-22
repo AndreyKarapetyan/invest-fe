@@ -7,15 +7,13 @@ import {
   Grid,
   InputAdornment,
   LinearProgress,
-  Snackbar,
-  styled,
   Tab,
   Tabs,
 } from '@mui/material';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { Search } from '@mui/icons-material';
-import { StudentDialog } from 'src/app/components/StudentDialog';
-import { TextField } from '@mui/material';
+import { SearchField, TopCenterSnackbar } from './styled';
+import { AdminStudentDialog } from 'src/app/components/admin/AdminStudentDialog';
 import {
   useCreateStudent,
   useGetBranches,
@@ -30,37 +28,11 @@ const columns = [
   { label: 'Id', name: 'id' },
   { label: 'Name', name: 'name' },
   { label: 'Lastname', name: 'lastname' },
+  { label: 'Status', name: 'status' },
   { label: 'Formal Fee', name: 'formalFee' },
   { label: 'Actual Fee', name: 'actualFee' },
   { label: 'Teacher', name: 'teacherFullName' },
 ];
-
-const SearchField = styled(TextField)({
-  width: '60vh',
-  borderRadius: 25,
-  backgroundColor: 'white',
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderColor: 'transparent',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    },
-    '&:hover fieldset': {
-      borderColor: 'transparent',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: 'transparent',
-    },
-    '& .MuiInputAdornment-root .MuiSvgIcon-root': {
-      color: 'gray',
-    },
-  },
-});
-
-const TopCenterSnackbar = styled(Snackbar)(({ theme }) => ({
-  '& .MuiSnackbar-root': {
-    top: theme.spacing(2),
-  },
-}));
 
 export const AdminHome = () => {
   const [currentBranch, setCurrentBranch] = useState(null);
@@ -151,7 +123,7 @@ export const AdminHome = () => {
       }}
     >
       {dialogOpen && (
-        <StudentDialog
+        <AdminStudentDialog
           student={student}
           handleSubmit={handleDialogSubmit}
           isOpen={dialogOpen}
@@ -237,7 +209,8 @@ export const AdminHome = () => {
       <InfiniteLoadingTable
         columns={columns}
         rows={students}
-        onRowClick={handleDialogOpen}
+        onEdit={handleDialogOpen}
+
         loadMore={loadMore}
         hasMore={hasMore}
       />

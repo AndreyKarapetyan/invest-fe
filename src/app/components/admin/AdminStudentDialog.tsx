@@ -1,42 +1,28 @@
 import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
 import {
-  Autocomplete,
   CircularProgress,
-  FormControl,
   Grid,
   InputLabel,
   MenuItem,
   Select,
   TextField,
 } from '@mui/material';
-import { StudentStatus } from '../types/student';
+import {
+  formFieldStyles,
+  StyledAutoComplete,
+  StyledDialog,
+  StyledFormControl,
+  StyledTextField,
+} from './styled';
 import { Fragment, useState } from 'react';
+import { StudentStatus } from '../../types/student';
 
-const StyledDialog = styled(Dialog)(() => ({
-  '& .MuiDialog-paper': {
-    width: '50%',
-  },
-}));
-
-const formFieldStyles = {
-  marginLeft: '10%',
-  marginRight: '20%',
-  marginBottom: '7%',
-  width: '70%',
-};
-
-const StyledTextField = styled(TextField)(() => formFieldStyles);
-const StyledFormControl = styled(FormControl)(() => formFieldStyles);
-const StyledAutoComplete = styled(Autocomplete)(() => formFieldStyles);
-
-interface DialogProps {
+interface AdminDialogProps {
   isOpen: boolean;
   student: any;
   handleSubmit: (data: any) => void;
@@ -48,18 +34,17 @@ interface DialogProps {
   handleClose: () => void;
 }
 
-export function StudentDialog(props: DialogProps) {
-  const {
-    isOpen,
-    student,
-    handleSubmit,
-    handleClose,
-    teachers,
-    teachersLoading,
-    groups,
-    groupsLoading,
-    getTeacherGroups,
-  } = props;
+export function AdminStudentDialog({
+  isOpen,
+  student,
+  handleSubmit,
+  handleClose,
+  teachers,
+  teachersLoading,
+  groups,
+  groupsLoading,
+  getTeacherGroups,
+}: AdminDialogProps) {
   const [studentData, setStudentData] = useState(
     student || {
       name: null,
@@ -75,9 +60,9 @@ export function StudentDialog(props: DialogProps) {
   const [teacherOptionsOpen, setTeacherOptionsOpen] = useState(false); // For circular progress
   const [groupOptionsOpen, setGroupOptionsOpen] = useState(false);
   const [isNewGroup, setIsNewGroup] = useState(!studentData.teacherId);
-  const [groupFieldOpen, setGroupFieldOpen] = useState(Boolean(studentData.teacherId));
-
-  console.log(groupFieldOpen)
+  const [groupFieldOpen, setGroupFieldOpen] = useState(
+    Boolean(studentData.teacherId)
+  );
 
   const handleStudentDataChange = (key: string, value: any) => {
     setStudentData((curStudent: any) => ({

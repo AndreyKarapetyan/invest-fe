@@ -1,18 +1,22 @@
-import { useState, useRef, useLayoutEffect, useCallback } from 'react';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import {
   debounce,
+  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
 } from '@mui/material';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 export function InfiniteLoadingTable({
   columns,
   rows,
-  onRowClick,
+  onEdit,
   loadMore,
   isLoading,
   hasMore,
@@ -45,10 +49,10 @@ export function InfiniteLoadingTable({
       tableRef.removeEventListener('scroll', scrollListener);
     };
   }, [scrollListener]);
-console.log(rows)
+  console.log(rows);
   return (
     <TableContainer
-      sx={{ maxWidth: 'inherit', maxHeight: '70vh', margin: 'auto'}}
+      sx={{ maxWidth: 'inherit', maxHeight: '70vh', margin: 'auto' }}
       ref={tableEl}
     >
       <Table stickyHeader>
@@ -57,14 +61,30 @@ console.log(rows)
             {columns.map((column: any) => (
               <TableCell>{column.label}</TableCell>
             ))}
+            <TableCell/>
+            <TableCell/>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.map((row: any) => (
-            <TableRow key={row.id} hover onClick={() => onRowClick(row)}>
+            <TableRow key={row.id} hover>
               {columns.map((column: any) => (
                 <TableCell>{row[column.name]}</TableCell>
               ))}
+              <TableCell>
+                <Tooltip title="Edit">
+                  <IconButton onClick={() => onEdit(row)} size="small">
+                    <EditIcon />
+                  </IconButton>
+                </Tooltip>
+              </TableCell>
+              <TableCell>
+                <Tooltip title="Delete">
+                  <IconButton onClick={() => {}} size="small">
+                    <DeleteIcon />
+                  </IconButton>
+                </Tooltip>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
