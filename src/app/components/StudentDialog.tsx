@@ -19,7 +19,7 @@ import {
 import { StudentStatus } from '../types/student';
 import { Fragment, useState } from 'react';
 
-const StyledDialog = styled(Dialog)(({ theme }) => ({
+const StyledDialog = styled(Dialog)(() => ({
   '& .MuiDialog-paper': {
     width: '50%',
   },
@@ -38,6 +38,8 @@ const StyledAutoComplete = styled(Autocomplete)(() => formFieldStyles);
 
 interface DialogProps {
   isOpen: boolean;
+  student: any;
+  handleSubmit: (data: any) => void;
   teachers: any;
   teachersLoading: boolean;
   groups: any;
@@ -49,6 +51,8 @@ interface DialogProps {
 export function StudentDialog(props: DialogProps) {
   const {
     isOpen,
+    student,
+    handleSubmit,
     handleClose,
     teachers,
     teachersLoading,
@@ -56,11 +60,29 @@ export function StudentDialog(props: DialogProps) {
     groupsLoading,
     getTeacherGroups,
   } = props;
-  const [teacherOptionsOpen, setTeacherOptionsOpen] = useState(false);
-  const [groupSelectionOpen, setGroupSelectionOpen] = useState(false);
-  const [isNewGroup, setIsNewGroup] = useState(false);
-  const [groupFieldOpen, setGroupFieldOpen] = useState(false);
+  const [studentData, setStudentData] = useState(
+    student || {
+      name: null,
+      lastname: null,
+      status: StudentStatus.Pending,
+      actualFee: null,
+      formalFee: null,
+      groupId: null,
+      groupName: null,
+      teacherId: null,
+    }
+  );
+  const [teacherOptionsOpen, setTeacherOptionsOpen] = useState(false); // For circular progress
   const [groupOptionsOpen, setGroupOptionsOpen] = useState(false);
+  const [isNewGroup, setIsNewGroup] = useState(!studentData.id);
+  const [groupFieldOpen, setGroupFieldOpen] = useState(Boolean(studentData.id));
+
+  const handleStudentDataChange = (key: string, value: any) => {
+    setStudentData((curStudent: any) => ({
+      ...curStudent,
+      [key]: value,
+    }));
+  };
 
   const handleTeacherOpen = () => {
     setTeacherOptionsOpen(true);
@@ -72,17 +94,26 @@ export function StudentDialog(props: DialogProps) {
 
   const handleTeacherChange = (_event: any, option: any) => {
     if (option && option.id) {
-      if (!groupSelectionOpen) {
-        setGroupSelectionOpen(true);
-      }
+      handleStudentDataChange('teacherId', option.id);
       getTeacherGroups(option.id);
     } else {
-      setGroupSelectionOpen(false);
+      handleStudentDataChange('teacherId', null);
+      handleStudentDataChange('groupId', null);
+      handleStudentDataChange('groupName', null);
       setGroupFieldOpen(false);
     }
   };
 
+  const handleGroupChange = (_event: any, option: any) => {
+    if (option && option.id) {
+      handleStudentDataChange('groupId', option.id);
+    } else {
+      handleStudentDataChange('groupId', null);
+    }
+  };
+
   const handleNewGroupOpen = () => {
+    handleStudentDataChange('groupId', null);
     setGroupFieldOpen(true);
     setIsNewGroup(true);
   };
@@ -90,15 +121,20 @@ export function StudentDialog(props: DialogProps) {
   const handleExistingGroupOpen = () => {
     setGroupFieldOpen(true);
     setIsNewGroup(false);
+    handleStudentDataChange('groupName', null);
   };
 
   const handleGroupOptionsOpen = () => {
     setGroupOptionsOpen(true);
-  }
+  };
 
   const handleGroupOptionsClose = () => {
     setGroupOptionsOpen(false);
-  }
+  };
+
+  const onInputChange = ({ target: { name, value } }: any) => {
+    handleStudentDataChange(name, value || null);
+  };
 
   return (
     <StyledDialog open={isOpen} onClose={handleClose}>
@@ -119,17 +155,53 @@ export function StudentDialog(props: DialogProps) {
       </DialogTitle>
       <DialogContent>
         <Grid container direction="column" marginTop={1}>
-          <StyledTextField label="Name" variant="outlined" required />
-          <StyledTextField label="Lastname" variant="outlined" required />
-          <StyledTextField label="Formal Fee" variant="outlined" required />
-          <StyledTextField label="Actual Fee" variant="outlined" required />
-          <StyledTextField label="Email" variant="outlined" />
+          <StyledTextField
+            name="name"
+            label="Name"
+            value={studentData.name}
+            variant="outlined"
+            required
+            onChange={onInputChange}
+          />
+          <StyledTextField
+            name="lastname"
+            label="Lastname"
+            value={studentData.lastname}
+            variant="outlined"
+            required
+            onChange={onInputChange}
+          />
+          <StyledTextField
+            name="formalFee"
+            label="Formal Fee"
+            value={studentData.formalFee}
+            variant="outlined"
+            required
+            onChange={onInputChange}
+          />
+          <StyledTextField
+            name="actualFee"
+            label="Actual Fee"
+            value={studentData.actualFee}
+            variant="outlined"
+            required
+            onChange={onInputChange}
+          />
+          <StyledTextField
+            name="email"
+            label="Email"
+            value={studentData.email}
+            variant="outlined"
+            onChange={onInputChange}
+          />
           <StyledFormControl>
             <InputLabel id="status-label">Status</InputLabel>
             <Select
               labelId="status-label"
+              name="status"
               label="Status"
-              defaultValue={StudentStatus.Pending}
+              value={studentData.status}
+              onChange={onInputChange}
             >
               <MenuItem value={StudentStatus.Pending}>Pending</MenuItem>
               <MenuItem value={StudentStatus.Registered}>Registered</MenuItem>
@@ -141,7 +213,12 @@ export function StudentDialog(props: DialogProps) {
             onChange={handleTeacherChange}
             options={(!teachersLoading && teachers) || []}
             loading={teachersLoading}
-            getOptionLabel={(option: any) => option.name}
+            getOptionLabel={(option: any) =>
+              `${option.name} ${option.lastname}`
+            }
+            value={
+              teachers.find((t: any) => t.id === studentData.teacherId) || null
+            }
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -160,7 +237,7 @@ export function StudentDialog(props: DialogProps) {
               />
             )}
           />
-          {groupSelectionOpen && (
+          {studentData.teacherId && (
             <Grid
               sx={{
                 display: 'flex',
@@ -181,18 +258,23 @@ export function StudentDialog(props: DialogProps) {
           {groupFieldOpen &&
             (isNewGroup ? (
               <StyledTextField
+                name="groupName"
                 label="New Group Name"
                 variant="outlined"
                 required
+                onChange={onInputChange}
               />
             ) : (
               <StyledAutoComplete
                 onOpen={handleGroupOptionsOpen}
                 onClose={handleGroupOptionsClose}
-                onChange={() => {}}
+                onChange={handleGroupChange}
                 options={(!groupsLoading && groups) || []}
                 loading={groupsLoading}
                 getOptionLabel={(option: any) => option.name}
+                value={
+                  groups.find((g: any) => g.id === studentData.groupId) || null
+                }
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -215,7 +297,7 @@ export function StudentDialog(props: DialogProps) {
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button autoFocus onClick={handleClose}>
+        <Button autoFocus onClick={() => handleSubmit(studentData)}>
           Save changes
         </Button>
       </DialogActions>

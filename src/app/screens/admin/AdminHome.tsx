@@ -1,25 +1,29 @@
+import AddIcon from '@mui/icons-material/Add';
 import {
+  Alert,
   Box,
   Button,
   Fade,
   Grid,
-  IconButton,
   InputAdornment,
-  InputBase,
   LinearProgress,
+  Snackbar,
   styled,
   Tab,
   Tabs,
-  Tooltip,
-  TooltipProps,
 } from '@mui/material';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
-import { StudentDialog } from 'src/app/components/StudentDialog';
-import { cloneElement, Fragment, useEffect, useState } from 'react';
-import { useGetBranches, useGetStudents, useGetTeacherGroups, useGetTeachers } from './hooks';
-import { TextField } from '@mui/material';
 import { Search } from '@mui/icons-material';
-import AddIcon from '@mui/icons-material/Add';
+import { StudentDialog } from 'src/app/components/StudentDialog';
+import { TextField } from '@mui/material';
+import {
+  useCreateStudent,
+  useGetBranches,
+  useGetStudents,
+  useGetTeacherGroups,
+  useGetTeachers,
+} from './hooks';
+import { useEffect, useState } from 'react';
 
 const columns = [{ name: 'id' }, { name: 'name' }, { name: 'lastname' }];
 
@@ -44,13 +48,27 @@ const SearchField = styled(TextField)({
   },
 });
 
+const TopCenterSnackbar = styled(Snackbar)(({ theme }) => ({
+  '& .MuiSnackbar-root': {
+    top: theme.spacing(2),
+  },
+}));
+
 export const AdminHome = () => {
   const [currentBranch, setCurrentBranch] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [student, setStudent] = useState<any>(null);
   const { branches, branchesLoading, getBranches } = useGetBranches();
   const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
   const { teachers, teachersLoading, getTeachers } = useGetTeachers();
   const { groups, groupsLoading, getTeacherGroups } = useGetTeacherGroups();
+  const {
+    studentCreationError,
+    resetStudentCreationSuccess,
+    isStudentCreated,
+    studentCreationLoading,
+    createStudent,
+  } = useCreateStudent();
 
   const handleBranchChange = (_event: any, branch: any) => {
     setCurrentBranch(branch);
@@ -62,12 +80,31 @@ export const AdminHome = () => {
 
   const handleDialogClose = () => {
     setDialogOpen(false);
+    setStudent(null);
   };
 
-  const handleDialogOpen = () => {
+  const handleDialogOpen = (studentData?: any) => {
+    if (studentData) {
+      setStudent(studentData);
+      if (studentData.teacherId) {
+        getTeacherGroups(studentData.teacherId);
+      }
+    }
     getTeachers(currentBranch);
     setDialogOpen(true);
   };
+
+  const handleDialogSubmit = (studentData: any) => {
+    if (!studentData.id) {
+      createStudent({ ...studentData, branchName: currentBranch });
+      // setShouldDialogSubmit(false);
+    }
+    // @Update
+  };
+
+  useEffect(() => {
+    getBranches();
+  }, []);
 
   useEffect(() => {
     if (branches.length && !currentBranch) {
@@ -79,8 +116,11 @@ export const AdminHome = () => {
   }, [branches, currentBranch]);
 
   useEffect(() => {
-    getBranches();
-  }, []);
+    if (isStudentCreated) {
+      setTimeout(() => resetStudentCreationSuccess(), 2000);
+      setTimeout(() => handleDialogClose(), 500);
+    }
+  }, [isStudentCreated]);
 
   return (
     <Box
@@ -91,15 +131,29 @@ export const AdminHome = () => {
         marginTop: 3,
       }}
     >
-      <StudentDialog
-        isOpen={dialogOpen}
-        handleClose={handleDialogClose}
-        teachers={teachers}
-        teachersLoading={teachersLoading}
-        groups={groups}
-        groupsLoading={groupsLoading}
-        getTeacherGroups={getTeacherGroups}
-      />
+      {dialogOpen && (
+        <StudentDialog
+          student={student}
+          handleSubmit={handleDialogSubmit}
+          isOpen={dialogOpen}
+          handleClose={handleDialogClose}
+          teachers={teachers}
+          teachersLoading={teachersLoading}
+          groups={groups}
+          groupsLoading={groupsLoading}
+          getTeacherGroups={getTeacherGroups}
+        />
+      )}
+      <Fade in={isStudentCreated}>
+        <TopCenterSnackbar
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          open={isStudentCreated}
+        >
+          <Alert severity="success" sx={{ width: '100%' }}>
+            Success
+          </Alert>
+        </TopCenterSnackbar>
+      </Fade>
       {currentBranch && (
         <Tabs
           sx={{ display: 'flex', justifyContent: 'center' }}
@@ -144,7 +198,7 @@ export const AdminHome = () => {
             whiteSpace: 'nowrap',
           }}
           variant="outlined"
-          onClick={handleDialogOpen}
+          onClick={() => handleDialogOpen()}
           startIcon={<AddIcon />}
         >
           New Student
@@ -164,6 +218,7 @@ export const AdminHome = () => {
       <InfiniteLoadingTable
         columns={columns}
         rows={students}
+        onRowClick={handleDialogOpen}
         loadMore={loadMore}
         hasMore={hasMore}
       />

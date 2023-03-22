@@ -1,5 +1,6 @@
 import { useState, useRef, useLayoutEffect, useCallback } from 'react';
 import {
+  debounce,
   Table,
   TableBody,
   TableCell,
@@ -11,24 +12,13 @@ import {
 export function InfiniteLoadingTable({
   columns,
   rows,
+  onRowClick,
   loadMore,
   isLoading,
   hasMore,
 }: any) {
   const tableEl = useRef<any>();
   const [distanceBottom, setDistanceBottom] = useState(0);
-
-  const debounce = (func: any) => {
-    let timeout: any;
-    return function executedFunction(...args: any[]) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, 50);
-    };
-  };
 
   const scrollListener = useCallback(
     debounce(() => {
@@ -44,7 +34,7 @@ export function InfiniteLoadingTable({
       ) {
         loadMore();
       }
-    }),
+    }, 50),
     [hasMore, loadMore, isLoading, distanceBottom]
   );
 
@@ -71,7 +61,7 @@ export function InfiniteLoadingTable({
         </TableHead>
         <TableBody>
           {rows.map((row: any) => (
-            <TableRow key={row.id}>
+            <TableRow key={row.id} hover onClick={() => onRowClick(row)}>
               {columns.map((column: any) => (
                 <TableCell>{row[column.name]}</TableCell>
               ))}
