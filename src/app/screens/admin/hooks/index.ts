@@ -4,6 +4,7 @@ import { useGetStudents } from './useGetStudents';
 import { useGetTeacherGroups } from './useGetTeacherGroups';
 import { useGetTeachers } from './useGetTeachers';
 import { useUpdateStudent } from './useUpdateStudent';
+import { useDeleteStudent } from './useDeleteStudent';
 
 export {
   useCreateStudent,
@@ -12,4 +13,5 @@ export {
   useGetTeacherGroups,
   useGetTeachers,
   useUpdateStudent,
+  useDeleteStudent
 };

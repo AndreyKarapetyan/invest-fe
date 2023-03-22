@@ -1,14 +1,17 @@
 import AddIcon from '@mui/icons-material/Add';
 import {
   Alert,
+  Backdrop,
   Box,
   Button,
+  CircularProgress,
   Fade,
   Grid,
   InputAdornment,
   LinearProgress,
   Tab,
   Tabs,
+  Theme,
 } from '@mui/material';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { Search } from '@mui/icons-material';
@@ -16,13 +19,15 @@ import { SearchField, TopCenterSnackbar } from './styled';
 import { AdminStudentDialog } from 'src/app/components/admin/AdminStudentDialog';
 import {
   useCreateStudent,
+  useDeleteStudent,
   useGetBranches,
   useGetStudents,
   useGetTeacherGroups,
   useGetTeachers,
   useUpdateStudent,
 } from './hooks';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ConfirmationDialog } from 'src/app/components/Confirmation';
 
 const columns = [
   { label: 'Id', name: 'id' },
@@ -38,6 +43,8 @@ export const AdminHome = () => {
   const [currentBranch, setCurrentBranch] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [student, setStudent] = useState<any>(null);
+  const [deletableStudent, setDeletableStudent] = useState<number | null>(null);
+  const [isLoadingShowing, setIsLoadingShowing] = useState(false);
   const { branches, branchesLoading, getBranches } = useGetBranches();
   const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
   const { teachers, teachersLoading, getTeachers } = useGetTeachers();
@@ -56,6 +63,14 @@ export const AdminHome = () => {
     studentUpdateLoading,
     updateStudent,
   } = useUpdateStudent();
+  const {
+    deleteStudent,
+    isStudentDeleted,
+    resetStudentDeleteSuccess,
+    studentDeleteError,
+    studentDeleteLoading,
+  } = useDeleteStudent();
+  const loadingTimeOut = useRef<any>();
 
   const handleBranchChange = (_event: any, branch: any) => {
     setCurrentBranch(branch);
@@ -89,6 +104,19 @@ export const AdminHome = () => {
     }
   };
 
+  const handleDeleteOpen = (studentId: number) => {
+    setDeletableStudent(studentId);
+  };
+
+  const handleDeleteClose = () => {
+    setDeletableStudent(null);
+  };
+
+  const handleDelete = () => {
+    deleteStudent(deletableStudent as number);
+    setDeletableStudent(null);
+  };
+
   useEffect(() => {
     getBranches();
   }, []);
@@ -113,6 +141,34 @@ export const AdminHome = () => {
     }
   }, [isStudentCreated, isStudentUpdated]);
 
+  useEffect(() => {
+    if (isStudentDeleted) {
+      getStudents(currentBranch, true);
+      setTimeout(() => {
+        resetStudentDeleteSuccess();
+      }, 2000);
+    }
+  }, [isStudentDeleted]);
+
+  useEffect(() => {
+    if (
+      branchesLoading ||
+      studentCreationLoading ||
+      studentUpdateLoading ||
+      studentDeleteLoading
+    ) {
+      loadingTimeOut.current = setTimeout(() => setIsLoadingShowing(true), 500);
+    } else {
+      clearTimeout(loadingTimeOut.current);
+      setIsLoadingShowing(false);
+    }
+  }, [
+    branchesLoading,
+    studentCreationLoading,
+    studentUpdateLoading,
+    studentDeleteLoading,
+  ]);
+
   return (
     <Box
       sx={{
@@ -122,29 +178,6 @@ export const AdminHome = () => {
         marginTop: 3,
       }}
     >
-      {dialogOpen && (
-        <AdminStudentDialog
-          student={student}
-          handleSubmit={handleDialogSubmit}
-          isOpen={dialogOpen}
-          handleClose={handleDialogClose}
-          teachers={teachers}
-          teachersLoading={teachersLoading}
-          groups={groups}
-          groupsLoading={groupsLoading}
-          getTeacherGroups={getTeacherGroups}
-        />
-      )}
-      <Fade in={isStudentCreated || isStudentUpdated}>
-        <TopCenterSnackbar
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          open={isStudentCreated || isStudentUpdated}
-        >
-          <Alert severity="success" sx={{ width: '100%' }}>
-            Success
-          </Alert>
-        </TopCenterSnackbar>
-      </Fade>
       {currentBranch && (
         <Tabs
           sx={{ display: 'flex', justifyContent: 'center' }}
@@ -210,10 +243,53 @@ export const AdminHome = () => {
         columns={columns}
         rows={students}
         onEdit={handleDialogOpen}
-
+        onDelete={handleDeleteOpen}
         loadMore={loadMore}
         hasMore={hasMore}
       />
+      {dialogOpen && (
+        <AdminStudentDialog
+          student={student}
+          handleSubmit={handleDialogSubmit}
+          isOpen={dialogOpen}
+          handleClose={handleDialogClose}
+          teachers={teachers}
+          teachersLoading={teachersLoading}
+          groups={groups}
+          groupsLoading={groupsLoading}
+          getTeacherGroups={getTeacherGroups}
+        />
+      )}
+      <Fade in={isStudentCreated || isStudentUpdated || isStudentDeleted}>
+        <TopCenterSnackbar
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          open={isStudentCreated || isStudentUpdated || isStudentDeleted}
+        >
+          <Alert severity="success" sx={{ width: '100%' }}>
+            Success
+          </Alert>
+        </TopCenterSnackbar>
+      </Fade>
+      {deletableStudent && (
+        <ConfirmationDialog
+          open={Boolean(deletableStudent)}
+          onConfirm={handleDelete}
+          onCancel={handleDeleteClose}
+          message="Are you sure you want to delete this student?"
+        />
+      )}
+      {isLoadingShowing && (
+        <Backdrop
+          unmountOnExit
+          sx={{
+            color: '#fff',
+            zIndex: (theme: Theme) => theme.zIndex.modal + 1,
+          }}
+          open={isLoadingShowing}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      )}
     </Box>
   );
 };
