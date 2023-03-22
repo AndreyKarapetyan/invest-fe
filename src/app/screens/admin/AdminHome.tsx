@@ -22,10 +22,18 @@ import {
   useGetStudents,
   useGetTeacherGroups,
   useGetTeachers,
+  useUpdateStudent,
 } from './hooks';
 import { useEffect, useState } from 'react';
 
-const columns = [{ name: 'id' }, { name: 'name' }, { name: 'lastname' }];
+const columns = [
+  { label: 'Id', name: 'id' },
+  { label: 'Name', name: 'name' },
+  { label: 'Lastname', name: 'lastname' },
+  { label: 'Formal Fee', name: 'formalFee' },
+  { label: 'Actual Fee', name: 'actualFee' },
+  { label: 'Teacher', name: 'teacherFullName' },
+];
 
 const SearchField = styled(TextField)({
   width: '60vh',
@@ -69,6 +77,13 @@ export const AdminHome = () => {
     studentCreationLoading,
     createStudent,
   } = useCreateStudent();
+  const {
+    isStudentUpdated,
+    resetStudentUpdateSuccess,
+    studentUpdateError,
+    studentUpdateLoading,
+    updateStudent,
+  } = useUpdateStudent();
 
   const handleBranchChange = (_event: any, branch: any) => {
     setCurrentBranch(branch);
@@ -95,11 +110,11 @@ export const AdminHome = () => {
   };
 
   const handleDialogSubmit = (studentData: any) => {
-    if (!studentData.id) {
+    if (studentData.id) {
+      updateStudent(studentData);
+    } else {
       createStudent({ ...studentData, branchName: currentBranch });
-      // setShouldDialogSubmit(false);
     }
-    // @Update
   };
 
   useEffect(() => {
@@ -116,11 +131,15 @@ export const AdminHome = () => {
   }, [branches, currentBranch]);
 
   useEffect(() => {
-    if (isStudentCreated) {
-      setTimeout(() => resetStudentCreationSuccess(), 2000);
+    if (isStudentCreated || isStudentUpdated) {
+      getStudents(currentBranch, true);
+      setTimeout(() => {
+        resetStudentCreationSuccess();
+        resetStudentUpdateSuccess();
+      }, 2000);
       setTimeout(() => handleDialogClose(), 500);
     }
-  }, [isStudentCreated]);
+  }, [isStudentCreated, isStudentUpdated]);
 
   return (
     <Box
@@ -144,10 +163,10 @@ export const AdminHome = () => {
           getTeacherGroups={getTeacherGroups}
         />
       )}
-      <Fade in={isStudentCreated}>
+      <Fade in={isStudentCreated || isStudentUpdated}>
         <TopCenterSnackbar
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          open={isStudentCreated}
+          open={isStudentCreated || isStudentUpdated}
         >
           <Alert severity="success" sx={{ width: '100%' }}>
             Success

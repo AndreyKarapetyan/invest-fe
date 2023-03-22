@@ -74,8 +74,10 @@ export function StudentDialog(props: DialogProps) {
   );
   const [teacherOptionsOpen, setTeacherOptionsOpen] = useState(false); // For circular progress
   const [groupOptionsOpen, setGroupOptionsOpen] = useState(false);
-  const [isNewGroup, setIsNewGroup] = useState(!studentData.id);
-  const [groupFieldOpen, setGroupFieldOpen] = useState(Boolean(studentData.id));
+  const [isNewGroup, setIsNewGroup] = useState(!studentData.teacherId);
+  const [groupFieldOpen, setGroupFieldOpen] = useState(Boolean(studentData.teacherId));
+
+  console.log(groupFieldOpen)
 
   const handleStudentDataChange = (key: string, value: any) => {
     setStudentData((curStudent: any) => ({

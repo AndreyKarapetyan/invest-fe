@@ -45,7 +45,7 @@ export function InfiniteLoadingTable({
       tableRef.removeEventListener('scroll', scrollListener);
     };
   }, [scrollListener]);
-
+console.log(rows)
   return (
     <TableContainer
       sx={{ maxWidth: 'inherit', maxHeight: '70vh', margin: 'auto'}}
@@ -55,7 +55,7 @@ export function InfiniteLoadingTable({
         <TableHead>
           <TableRow>
             {columns.map((column: any) => (
-              <TableCell>{column.name}</TableCell>
+              <TableCell>{column.label}</TableCell>
             ))}
           </TableRow>
         </TableHead>
