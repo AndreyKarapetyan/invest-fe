@@ -20,9 +20,3 @@ export const SearchField = styled(TextField)({
     },
   },
 });
-
-export const TopCenterSnackbar = styled(Snackbar)(({ theme }) => ({
-  '& .MuiSnackbar-root': {
-    top: theme.spacing(2),
-  },
-}));

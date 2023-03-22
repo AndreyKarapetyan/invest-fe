@@ -1,22 +1,21 @@
 import AddIcon from '@mui/icons-material/Add';
+import { AdminStudentDialog } from 'src/app/components/admin/AdminStudentDialog';
 import {
-  Alert,
-  Backdrop,
   Box,
   Button,
-  CircularProgress,
   Fade,
   Grid,
   InputAdornment,
   LinearProgress,
   Tab,
   Tabs,
-  Theme,
 } from '@mui/material';
+import { ConfirmationDialog } from 'src/app/components/Confirmation';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
+import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { Search } from '@mui/icons-material';
-import { SearchField, TopCenterSnackbar } from './styled';
-import { AdminStudentDialog } from 'src/app/components/admin/AdminStudentDialog';
+import { SearchField } from './styled';
+import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import {
   useCreateStudent,
   useDeleteStudent,
@@ -27,7 +26,6 @@ import {
   useUpdateStudent,
 } from './hooks';
 import { useEffect, useRef, useState } from 'react';
-import { ConfirmationDialog } from 'src/app/components/Confirmation';
 
 const columns = [
   { label: 'Id', name: 'id' },
@@ -157,7 +155,7 @@ export const AdminHome = () => {
       studentUpdateLoading ||
       studentDeleteLoading
     ) {
-      loadingTimeOut.current = setTimeout(() => setIsLoadingShowing(true), 500);
+      loadingTimeOut.current = setTimeout(() => setIsLoadingShowing(true), 100);
     } else {
       clearTimeout(loadingTimeOut.current);
       setIsLoadingShowing(false);
@@ -260,16 +258,12 @@ export const AdminHome = () => {
           getTeacherGroups={getTeacherGroups}
         />
       )}
-      <Fade in={isStudentCreated || isStudentUpdated || isStudentDeleted}>
+      {(isStudentCreated || isStudentUpdated || isStudentDeleted) && (
         <TopCenterSnackbar
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          message="Success"
           open={isStudentCreated || isStudentUpdated || isStudentDeleted}
-        >
-          <Alert severity="success" sx={{ width: '100%' }}>
-            Success
-          </Alert>
-        </TopCenterSnackbar>
-      </Fade>
+        />
+      )}
       {deletableStudent && (
         <ConfirmationDialog
           open={Boolean(deletableStudent)}
@@ -278,18 +272,7 @@ export const AdminHome = () => {
           message="Are you sure you want to delete this student?"
         />
       )}
-      {isLoadingShowing && (
-        <Backdrop
-          unmountOnExit
-          sx={{
-            color: '#fff',
-            zIndex: (theme: Theme) => theme.zIndex.modal + 1,
-          }}
-          open={isLoadingShowing}
-        >
-          <CircularProgress color="inherit" />
-        </Backdrop>
-      )}
+      {isLoadingShowing && <LoadingIndicator open={isLoadingShowing} />}
     </Box>
   );
 };
