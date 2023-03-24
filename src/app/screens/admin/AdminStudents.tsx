@@ -1,16 +1,15 @@
 import AddIcon from '@mui/icons-material/Add';
 import { AdminStudentDialog } from 'src/app/components/admin/AdminStudentDialog';
+import { BranchContext } from 'src/app/components/admin/AdminRoute';
 import {
-  Box,
   Button,
   Fade,
   Grid,
   InputAdornment,
   LinearProgress,
-  Tab,
-  Tabs,
 } from '@mui/material';
 import { ConfirmationDialog } from 'src/app/components/Confirmation';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { Search } from '@mui/icons-material';
@@ -19,13 +18,11 @@ import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import {
   useCreateStudent,
   useDeleteStudent,
-  useGetBranches,
   useGetStudents,
   useGetTeacherGroups,
   useGetTeachers,
   useUpdateStudent,
 } from './hooks';
-import { useEffect, useRef, useState } from 'react';
 
 const columns = [
   { label: 'Id', name: 'id' },
@@ -38,12 +35,10 @@ const columns = [
 ];
 
 export function AdminStudents() {
-  const [currentBranch, setCurrentBranch] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [student, setStudent] = useState<any>(null);
   const [deletableStudent, setDeletableStudent] = useState<number | null>(null);
   const [isLoadingShowing, setIsLoadingShowing] = useState(false);
-  const { branches, branchesLoading, getBranches } = useGetBranches();
   const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
   const { teachers, teachersLoading, getTeachers } = useGetTeachers();
   const { groups, groupsLoading, getTeacherGroups } = useGetTeacherGroups();
@@ -69,10 +64,7 @@ export function AdminStudents() {
     studentDeleteLoading,
   } = useDeleteStudent();
   const loadingTimeOut = useRef<any>();
-
-  const handleBranchChange = (_event: any, branch: any) => {
-    setCurrentBranch(branch);
-  };
+  const currentBranch = useContext(BranchContext);
 
   const loadMore = () => {
     getStudents(currentBranch);
@@ -116,17 +108,10 @@ export function AdminStudents() {
   };
 
   useEffect(() => {
-    getBranches();
-  }, []);
-
-  useEffect(() => {
-    if (branches.length && !currentBranch) {
-      setCurrentBranch(branches[0].name);
-    }
     if (currentBranch) {
       getStudents(currentBranch, true);
     }
-  }, [branches, currentBranch]);
+  }, [currentBranch]);
 
   useEffect(() => {
     if (isStudentCreated || isStudentUpdated) {
@@ -150,7 +135,6 @@ export function AdminStudents() {
 
   useEffect(() => {
     if (
-      branchesLoading ||
       studentCreationLoading ||
       studentUpdateLoading ||
       studentDeleteLoading
@@ -160,36 +144,10 @@ export function AdminStudents() {
       clearTimeout(loadingTimeOut.current);
       setIsLoadingShowing(false);
     }
-  }, [
-    branchesLoading,
-    studentCreationLoading,
-    studentUpdateLoading,
-    studentDeleteLoading,
-  ]);
+  }, [studentCreationLoading, studentUpdateLoading, studentDeleteLoading]);
 
   return (
-    <Box
-      sx={{
-        width: '80%',
-        maxHeight: '90vh',
-        marginX: 'auto',
-        marginTop: 3,
-      }}
-    >
-      {currentBranch && (
-        <Tabs
-          sx={{ display: 'flex', justifyContent: 'center' }}
-          value={currentBranch}
-          onChange={handleBranchChange}
-          textColor="secondary"
-          indicatorColor="secondary"
-          aria-label="secondary tabs example"
-        >
-          {branches.map(({ name }) => (
-            <Tab key={name} value={name} label={name} sx={{ flexGrow: 1 }} />
-          ))}
-        </Tabs>
-      )}
+    <Fragment>
       <Grid
         sx={{
           display: 'flex',
@@ -273,6 +231,6 @@ export function AdminStudents() {
         />
       )}
       {isLoadingShowing && <LoadingIndicator open={isLoadingShowing} />}
-    </Box>
+    </Fragment>
   );
-};
+}
