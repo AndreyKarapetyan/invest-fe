@@ -1,6 +1,6 @@
 import { Route, Routes, Link } from 'react-router-dom';
 import Login from './screens/Login';
-import { AdminHome } from './screens/admin/AdminHome';
+import { AdminStudents } from './screens/admin/AdminStudents';
 import { Box } from '@mui/system';
 import { AdminRoute } from './components/admin/AdminRoute';
 
@@ -9,10 +9,10 @@ export function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route
-        path="/"
+        path="/students"
         element={
           <AdminRoute>
-            <AdminHome/>
+            <AdminStudents/>
           </AdminRoute>
         }
       />

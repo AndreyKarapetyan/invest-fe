@@ -37,7 +37,7 @@ const columns = [
   { label: 'Teacher', name: 'teacherFullName' },
 ];
 
-export const AdminHome = () => {
+export function AdminStudents() {
   const [currentBranch, setCurrentBranch] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [student, setStudent] = useState<any>(null);
