@@ -15,135 +15,109 @@ import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { Search } from '@mui/icons-material';
 import { SearchField } from './styled';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
-import {
-  useCreateStudent,
-  useDeleteStudent,
-  useGetStudents,
-  useUpdateStudent,
-} from './hooks/student';
-import { useGetTeachers, useGetTeacherGroups } from './hooks/teacher';
+import { useDeleteTeacher, useGetTeachers } from './hooks/teacher';
 
 const columns = [
   { label: 'Id', name: 'id' },
   { label: 'Name', name: 'name' },
   { label: 'Lastname', name: 'lastname' },
-  { label: 'Status', name: 'status' },
-  { label: 'Formal Fee', name: 'formalFee' },
-  { label: 'Actual Fee', name: 'actualFee' },
-  { label: 'Teacher', name: 'teacherFullName' },
 ];
 
-export function AdminStudents() {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [student, setStudent] = useState<any>(null);
-  const [deletableStudent, setDeletableStudent] = useState<number | null>(null);
+export function AdminTeachers() {
+  // const [dialogOpen, setDialogOpen] = useState(false);
+  // const [student, setStudent] = useState<any>(null);
+  const [deletableTeacher, setDeletableTeacher] = useState<number | null>(null);
   const [isLoadingShowing, setIsLoadingShowing] = useState(false);
-  const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
+  // const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
   const { teachers, teachersLoading, getTeachers } = useGetTeachers();
-  const { groups, groupsLoading, getTeacherGroups } = useGetTeacherGroups();
   const {
-    studentCreationError,
-    resetStudentCreationSuccess,
-    isStudentCreated,
-    studentCreationLoading,
-    createStudent,
-  } = useCreateStudent();
-  const {
-    isStudentUpdated,
-    resetStudentUpdateSuccess,
-    studentUpdateError,
-    studentUpdateLoading,
-    updateStudent,
-  } = useUpdateStudent();
-  const {
-    deleteStudent,
-    isStudentDeleted,
-    resetStudentDeleteSuccess,
-    studentDeleteError,
-    studentDeleteLoading,
-  } = useDeleteStudent();
+    teacherDeleteLoading,
+    teacherDeleteError,
+    isTeacherDeleted,
+    resetTeacherDeleteSuccess,
+    deleteTeacher,
+  } = useDeleteTeacher();
+  // const { groups, groupsLoading, getTeacherGroups } = useGetTeacherGroups();
   const loadingTimeOut = useRef<any>();
   const currentBranch = useContext(BranchContext);
 
-  const loadMore = () => {
-    getStudents(currentBranch);
-  };
+  // const handleDialogClose = () => {
+  //   setDialogOpen(false);
+  //   setStudent(null);
+  // };
 
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-    setStudent(null);
-  };
+  // const handleDialogOpen = (studentData?: any) => {
+  //   if (studentData) {
+  //     setStudent(studentData);
+  //     if (studentData.teacherId) {
+  //       getTeacherGroups(studentData.teacherId);
+  //     }
+  //   }
+  //   getTeachers(currentBranch);
+  //   setDialogOpen(true);
+  // };
 
-  const handleDialogOpen = (studentData?: any) => {
-    if (studentData) {
-      setStudent(studentData);
-      if (studentData.teacherId) {
-        getTeacherGroups(studentData.teacherId);
-      }
-    }
-    getTeachers(currentBranch);
-    setDialogOpen(true);
-  };
+  // const handleDialogSubmit = (studentData: any) => {
+  //   if (studentData.id) {
+  //     updateStudent(studentData);
+  //   } else {
+  //     createStudent({ ...studentData, branchName: currentBranch });
+  //   }
+  // };
 
-  const handleDialogSubmit = (studentData: any) => {
-    if (studentData.id) {
-      updateStudent(studentData);
-    } else {
-      createStudent({ ...studentData, branchName: currentBranch });
-    }
-  };
-
-  const handleDeleteOpen = (studentId: number) => {
-    setDeletableStudent(studentId);
+  const handleDeleteOpen = (teacherId: number) => {
+    setDeletableTeacher(teacherId);
   };
 
   const handleDeleteClose = () => {
-    setDeletableStudent(null);
+    setDeletableTeacher(null);
   };
 
   const handleDelete = () => {
-    deleteStudent(deletableStudent as number);
-    setDeletableStudent(null);
+    deleteTeacher(deletableTeacher as number);
+    setDeletableTeacher(null);
   };
 
   useEffect(() => {
     if (currentBranch) {
-      getStudents(currentBranch, true);
+      getTeachers(currentBranch);
     }
   }, [currentBranch]);
 
-  useEffect(() => {
-    if (isStudentCreated || isStudentUpdated) {
-      getStudents(currentBranch, true);
-      setTimeout(() => {
-        resetStudentCreationSuccess();
-        resetStudentUpdateSuccess();
-      }, 2000);
-      setTimeout(() => handleDialogClose(), 500);
-    }
-  }, [isStudentCreated, isStudentUpdated]);
+  // useEffect(() => {
+  //   if (isStudentCreated || isStudentUpdated) {
+  //     getStudents(currentBranch, true);
+  //     setTimeout(() => {
+  //       resetStudentCreationSuccess();
+  //       resetStudentUpdateSuccess();
+  //     }, 2000);
+  //     setTimeout(() => handleDialogClose(), 500);
+  //   }
+  // }, [isStudentCreated, isStudentUpdated]);
 
   useEffect(() => {
-    if (isStudentDeleted) {
-      getStudents(currentBranch, true);
+    if (isTeacherDeleted) {
+      getTeachers(currentBranch);
       setTimeout(() => {
-        resetStudentDeleteSuccess();
+        resetTeacherDeleteSuccess();
       }, 2000);
     }
-  }, [isStudentDeleted]);
+  }, [isTeacherDeleted]);
 
   useEffect(() => {
     if (
-      studentCreationLoading ||
-      studentUpdateLoading ||
-      studentDeleteLoading
+      // teacherCreationLoading ||
+      // teacherUpdateLoading ||
+      teacherDeleteLoading
     ) {
       loadingTimeOut.current = setTimeout(() => setIsLoadingShowing(true), 100);
     } else {
       clearTimeout(loadingTimeOut.current);
       setIsLoadingShowing(false);
     }
-  }, [studentCreationLoading, studentUpdateLoading, studentDeleteLoading]);
+  }, [
+    /* teacherCreationLoading, teacherUpdateLoading,  */ teacherDeleteLoading,
+  ]);
 
   return (
     <Fragment>
@@ -177,17 +151,17 @@ export function AdminStudents() {
             whiteSpace: 'nowrap',
           }}
           variant="outlined"
-          onClick={() => handleDialogOpen()}
+          // onClick={() => handleDialogOpen()}
           startIcon={<AddIcon />}
         >
-          New Student
+          New Teacher
         </Button>
       </Grid>
-      {studentsLoading && (
+      {teachersLoading && (
         <Fade
-          in={studentsLoading}
+          in={teachersLoading}
           style={{
-            transitionDelay: studentsLoading ? '800ms' : '0ms',
+            transitionDelay: teachersLoading ? '800ms' : '0ms',
           }}
           unmountOnExit
         >
@@ -196,13 +170,12 @@ export function AdminStudents() {
       )}
       <InfiniteLoadingTable
         columns={columns}
-        rows={students}
-        onEdit={handleDialogOpen}
+        rows={teachers}
+        // onEdit={handleDialogOpen}
         onDelete={handleDeleteOpen}
-        loadMore={loadMore}
-        hasMore={hasMore}
+        hasMore={false}
       />
-      {dialogOpen && (
+      {/* {dialogOpen && (
         <AdminStudentDialog
           student={student}
           handleSubmit={handleDialogSubmit}
@@ -214,16 +187,16 @@ export function AdminStudents() {
           groupsLoading={groupsLoading}
           getTeacherGroups={getTeacherGroups}
         />
-      )}
-      {(isStudentCreated || isStudentUpdated || isStudentDeleted) && (
+      )} */}
+      {/* {(isStudentCreated || isStudentUpdated || isStudentDeleted) && (
         <TopCenterSnackbar
           message="Success"
           open={isStudentCreated || isStudentUpdated || isStudentDeleted}
         />
-      )}
-      {deletableStudent && (
+      )} */}
+      {deletableTeacher && (
         <ConfirmationDialog
-          open={Boolean(deletableStudent)}
+          open={Boolean(deletableTeacher)}
           onConfirm={handleDelete}
           onCancel={handleDeleteClose}
           message="Are you sure you want to delete this student?"

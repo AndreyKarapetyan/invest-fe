@@ -35,7 +35,8 @@ export function InfiniteLoadingTable({
       if (
         tableEl.current.scrollTop > bottom - distanceBottom &&
         hasMore &&
-        !isLoading
+        !isLoading &&
+        loadMore
       ) {
         loadMore();
       }
@@ -62,8 +63,8 @@ export function InfiniteLoadingTable({
             {columns.map((column: any) => (
               <TableCell>{column.label}</TableCell>
             ))}
-            <TableCell/>
-            <TableCell/>
+            <TableCell />
+            <TableCell />
           </TableRow>
         </TableHead>
         <TableBody>
