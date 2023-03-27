@@ -1,6 +1,6 @@
 import AddIcon from '@mui/icons-material/Add';
 import { AdminStudentDialog } from 'src/app/components/admin/AdminStudentDialog';
-import { BranchContext } from 'src/app/components/admin/AdminRoute';
+import { BranchContext } from 'src/app/components/admin/WithBranches';
 import {
   Button,
   Fade,
@@ -58,7 +58,7 @@ export function AdminStudents() {
   const {
     deleteStudent,
     isStudentDeleted,
-    resetStudentDeleteSuccess,
+    resetStudentDeleteSuccess, // @TODO: problematic if two deletes within the timeout: do something (move to local state)
     studentDeleteError,
     studentDeleteLoading,
   } = useDeleteStudent();
@@ -148,12 +148,9 @@ export function AdminStudents() {
   return (
     <Fragment>
       <Grid
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
+        container
+        justifyContent="space-between"
+        alignItems="center"
       >
         <SearchField
           sx={{ marginY: 3, marginX: 2 }}

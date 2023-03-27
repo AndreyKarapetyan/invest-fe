@@ -1,54 +1,26 @@
-import Button from '@mui/material/Button';
-import CloseIcon from '@mui/icons-material/Close';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import IconButton from '@mui/material/IconButton';
+import { VisibilityOff, Visibility } from '@mui/icons-material';
 import {
-  CircularProgress,
+  DialogTitle,
+  IconButton,
+  DialogContent,
   Grid,
-  InputAdornment,
   InputLabel,
-  MenuItem,
   OutlinedInput,
-  Select,
-  TextField,
+  InputAdornment,
+  DialogActions,
+  Button,
+  Box,
 } from '@mui/material';
+import { useState } from 'react';
+import { DnD } from 'src/app/components/admin/DnD';
 import {
-  formFieldStyles,
-  StyledAutoComplete,
   StyledDialog,
-  StyledFormControl,
   StyledTextField,
-} from './styled/teacher-dialog';
-import { Fragment, useState } from 'react';
-import { StudentStatus } from '../../types/student';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { DnD } from './DnD';
+  StyledFormControl,
+} from 'src/app/components/admin/styled/teacher-dialog';
 
-interface AdminDialogProps {
-  isOpen: boolean;
-  teacher: any;
-  handleSubmit: (data: any) => void;
-  // teachers: any;
-  // teachersLoading: boolean;
-  // groups: any;
-  // groupsLoading: boolean;
-  // getTeacherGroups: (teacherId: number) => void;
-  handleClose: () => void;
-}
-
-export function AdminTeacherDialog({
-  isOpen = true,
-  teacher,
-  handleSubmit,
-  handleClose,
-}: // teachers,
-// teachersLoading,
-// groups,
-// groupsLoading,
-// getTeacherGroups,
-AdminDialogProps) {
+export function AdminTeacher(props: any) {
+  const teacher = null;
   const [teacherData, setTeacherData] = useState(
     teacher || {
       name: null,
@@ -132,86 +104,69 @@ AdminDialogProps) {
   };
 
   return (
-    <StyledDialog keepMounted open={isOpen} onClose={handleClose}>
-      <DialogTitle>
-        New Teacher
-        <IconButton
-          aria-label="close"
-          onClick={handleClose}
-          sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>
-        <Grid
-          container
-          direction="row"
-          flexWrap="wrap"
-          justifyContent="space-evenly"
-        >
-          <StyledTextField
-            name="name"
-            label="Name"
-            value={teacherData.name}
-            variant="outlined"
-            required
-            onChange={onInputChange}
-          />
-          <StyledTextField
-            name="lastname"
-            label="Lastname"
-            value={teacherData.lastname}
-            variant="outlined"
-            required
-            onChange={onInputChange}
-          />
-          <StyledTextField
-            name="email"
-            label="Email"
-            value={teacherData.email}
-            variant="outlined"
-            onChange={onInputChange}
-          />
-          <StyledFormControl variant="outlined">
-            <InputLabel htmlFor="outlined-adornment-password">
-              Password
-            </InputLabel>
-            <OutlinedInput
-              id="outlined-adornment-password"
-              label="Password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              value={teacherData.password}
-              onChange={onInputChange}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={handleShowPassword}
-                    // onMouseDown={handleMouseDownPassword}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-          </StyledFormControl>
-          <DnD/>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button autoFocus onClick={() => handleSubmit(() => {})}>
-          Save changes
-        </Button>
-      </DialogActions>
-    </StyledDialog>
+    <Box
+      sx={{
+        width: '80%',
+        maxHeight: '90vh',
+        marginX: 'auto',
+        marginTop: 3,
+      }}
+    >
+    <Grid
+      container
+      direction="row"
+      flexWrap="wrap"
+      justifyContent="space-evenly"
+    >
+      <StyledTextField
+        name="name"
+        label="Name"
+        value={teacherData.name}
+        variant="outlined"
+        required
+        onChange={onInputChange}
+      />
+      <StyledTextField
+        name="lastname"
+        label="Lastname"
+        value={teacherData.lastname}
+        variant="outlined"
+        required
+        onChange={onInputChange}
+      />
+      <StyledTextField
+        name="email"
+        label="Email"
+        value={teacherData.email}
+        variant="outlined"
+        onChange={onInputChange}
+      />
+      <StyledFormControl variant="outlined">
+        <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+        <OutlinedInput
+          id="outlined-adornment-password"
+          label="Password"
+          name="password"
+          type={showPassword ? 'text' : 'password'}
+          value={teacherData.password}
+          onChange={onInputChange}
+          endAdornment={
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={handleShowPassword}
+                // onMouseDown={handleMouseDownPassword}
+                edge="end"
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          }
+        />
+      </StyledFormControl>
+      <DnD />
+    </Grid>
+    </Box>
   );
 }
 

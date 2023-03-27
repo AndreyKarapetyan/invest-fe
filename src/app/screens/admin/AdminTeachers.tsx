@@ -1,6 +1,6 @@
 import AddIcon from '@mui/icons-material/Add';
 import { AdminStudentDialog } from 'src/app/components/admin/AdminStudentDialog';
-import { BranchContext } from 'src/app/components/admin/AdminRoute';
+import { BranchContext } from 'src/app/components/admin/WithBranches';
 import {
   Button,
   Fade,
@@ -16,6 +16,7 @@ import { Search } from '@mui/icons-material';
 import { SearchField } from './styled';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import { useDeleteTeacher, useGetTeachers } from './hooks/teacher';
+import { AdminTeacherDialog } from 'src/app/components/admin/AdminTeacherDialog';
 
 const columns = [
   { label: 'Id', name: 'id' },
@@ -24,8 +25,8 @@ const columns = [
 ];
 
 export function AdminTeachers() {
-  // const [dialogOpen, setDialogOpen] = useState(false);
-  // const [student, setStudent] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [teacher, setTeacher] = useState<any>(null);
   const [deletableTeacher, setDeletableTeacher] = useState<number | null>(null);
   const [isLoadingShowing, setIsLoadingShowing] = useState(false);
   // const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
@@ -41,29 +42,29 @@ export function AdminTeachers() {
   const loadingTimeOut = useRef<any>();
   const currentBranch = useContext(BranchContext);
 
-  // const handleDialogClose = () => {
-  //   setDialogOpen(false);
-  //   setStudent(null);
-  // };
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setTeacher(null);
+  };
 
-  // const handleDialogOpen = (studentData?: any) => {
-  //   if (studentData) {
-  //     setStudent(studentData);
-  //     if (studentData.teacherId) {
-  //       getTeacherGroups(studentData.teacherId);
-  //     }
-  //   }
-  //   getTeachers(currentBranch);
-  //   setDialogOpen(true);
-  // };
+  const handleDialogOpen = (teacherData?: any) => {
+    if (teacherData) {
+      setTeacher(teacherData);
+      if (teacherData.id) {
+        // getTeacherGroups(studentData.teacherId);
+      }
+    }
+    // getTeachers(currentBranch);
+    setDialogOpen(true);
+  };
 
-  // const handleDialogSubmit = (studentData: any) => {
-  //   if (studentData.id) {
-  //     updateStudent(studentData);
-  //   } else {
-  //     createStudent({ ...studentData, branchName: currentBranch });
-  //   }
-  // };
+  const handleDialogSubmit = (teacherData: any) => {
+    if (teacherData.id) {
+      // updateStudent(studentData);
+    } else {
+      // createStudent({ ...studentData, branchName: currentBranch });
+    }
+  };
 
   const handleDeleteOpen = (teacherId: number) => {
     setDeletableTeacher(teacherId);
@@ -122,12 +123,9 @@ export function AdminTeachers() {
   return (
     <Fragment>
       <Grid
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
+        container
+        justifyContent="space-between"
+        alignItems="center"
       >
         <SearchField
           sx={{ marginY: 3, marginX: 2 }}
@@ -151,7 +149,7 @@ export function AdminTeachers() {
             whiteSpace: 'nowrap',
           }}
           variant="outlined"
-          // onClick={() => handleDialogOpen()}
+          onClick={() => handleDialogOpen()}
           startIcon={<AddIcon />}
         >
           New Teacher
@@ -171,23 +169,23 @@ export function AdminTeachers() {
       <InfiniteLoadingTable
         columns={columns}
         rows={teachers}
-        // onEdit={handleDialogOpen}
+        onEdit={handleDialogOpen}
         onDelete={handleDeleteOpen}
         hasMore={false}
       />
-      {/* {dialogOpen && (
-        <AdminStudentDialog
-          student={student}
+      {dialogOpen && (
+        <AdminTeacherDialog
+          teacher={teacher}
           handleSubmit={handleDialogSubmit}
           isOpen={dialogOpen}
           handleClose={handleDialogClose}
-          teachers={teachers}
-          teachersLoading={teachersLoading}
-          groups={groups}
-          groupsLoading={groupsLoading}
-          getTeacherGroups={getTeacherGroups}
+          // teachers={teachers}
+          // teachersLoading={teachersLoading}
+          // groups={groups}
+          // groupsLoading={groupsLoading}
+          // getTeacherGroups={getTeacherGroups}
         />
-      )} */}
+      )}
       {/* {(isStudentCreated || isStudentUpdated || isStudentDeleted) && (
         <TopCenterSnackbar
           message="Success"

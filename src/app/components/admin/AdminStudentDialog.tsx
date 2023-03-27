@@ -18,7 +18,7 @@ import {
   StyledDialog,
   StyledFormControl,
   StyledTextField,
-} from './styled';
+} from './styled/student-dialog';
 import { Fragment, useState } from 'react';
 import { StudentStatus } from '../../types/student';
 

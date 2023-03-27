@@ -1,10 +1,17 @@
-import { Dialog, TextField, FormControl, Autocomplete, styled } from "@mui/material";
+import {
+  Autocomplete,
+  Dialog,
+  FormControl,
+  styled,
+  TextField,
+} from '@mui/material';
 
 export const formFieldStyles = {
   marginLeft: '10%',
   marginRight: '20%',
   marginBottom: '7%',
   width: '70%',
+  minWidth: '250px'
 };
 
 export const StyledDialog = styled(Dialog)(() => ({

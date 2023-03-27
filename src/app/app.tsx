@@ -1,8 +1,10 @@
 import Login from './screens/Login';
-import { AdminRoute } from './components/admin/AdminRoute';
+import { WithBranches } from './components/admin/WithBranches';
 import { AdminStudents } from './screens/admin/AdminStudents';
 import { AdminTeachers } from './screens/admin/AdminTeachers';
 import { Route, Routes } from 'react-router-dom';
+import { AdminTeacher } from './screens/admin/AdminTeacher';
+import { WithSlider } from './components/admin/WithSlider';
 
 export function App() {
   return (
@@ -11,17 +13,29 @@ export function App() {
       <Route
         path="/students"
         element={
-          <AdminRoute>
-            <AdminStudents />
-          </AdminRoute>
+          <WithSlider>
+            <WithBranches>
+              <AdminStudents />
+            </WithBranches>
+          </WithSlider>
         }
       />
       <Route
         path="/teachers"
         element={
-          <AdminRoute>
-            <AdminTeachers />
-          </AdminRoute>
+          <WithSlider>
+            <WithBranches>
+              <AdminTeachers />
+            </WithBranches>
+          </WithSlider>
+        }
+      />
+      <Route
+        path="/teachers/:teacherId"
+        element={
+          <WithSlider>
+            <AdminTeacher />
+          </WithSlider>
         }
       />
     </Routes>
