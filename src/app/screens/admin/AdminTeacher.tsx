@@ -18,6 +18,7 @@ import {
   StyledTextField,
   StyledFormControl,
 } from 'src/app/components/admin/styled/teacher-dialog';
+import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
 
 export function AdminTeacher(props: any) {
   const teacher = null;

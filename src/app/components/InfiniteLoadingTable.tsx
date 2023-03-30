@@ -1,7 +1,6 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import {
-  debounce,
   IconButton,
   Table,
   TableBody,
@@ -11,9 +10,10 @@ import {
   TableRow,
   Tooltip,
 } from '@mui/material';
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { memo } from 'react';
+import { useInfiniteLoading } from '../hooks/useInfiniteLoading';
 
-export function InfiniteLoadingTable({
+export const InfiniteLoadingTable = memo(function InfiniteLoadingTable({
   columns,
   rows,
   onEdit,
@@ -22,40 +22,12 @@ export function InfiniteLoadingTable({
   isLoading,
   hasMore,
 }: any) {
-  const tableEl = useRef<any>();
-  const [distanceBottom, setDistanceBottom] = useState(0);
-
-  const scrollListener = useCallback(
-    debounce(() => {
-      const bottom =
-        tableEl.current.scrollHeight - tableEl.current.clientHeight;
-      if (!distanceBottom) {
-        setDistanceBottom(Math.round(bottom * 0.2));
-      }
-      if (
-        tableEl.current.scrollTop > bottom - distanceBottom &&
-        hasMore &&
-        !isLoading &&
-        loadMore
-      ) {
-        loadMore();
-      }
-    }, 50),
-    [hasMore, loadMore, isLoading, distanceBottom]
-  );
-
-  useLayoutEffect(() => {
-    const tableRef = tableEl.current;
-    tableRef.addEventListener('scroll', scrollListener);
-    return () => {
-      tableRef.removeEventListener('scroll', scrollListener);
-    };
-  }, [scrollListener]);
+  const tableRef = useInfiniteLoading({ hasMore, isLoading, loadMore });
   
   return (
     <TableContainer
       sx={{ maxWidth: 'inherit', maxHeight: '70vh', margin: 'auto' }}
-      ref={tableEl}
+      ref={tableRef}
     >
       <Table stickyHeader>
         <TableHead>
@@ -82,7 +54,7 @@ export function InfiniteLoadingTable({
               </TableCell>
               <TableCell>
                 <Tooltip title="Delete">
-                  <IconButton onClick={() => onDelete(row.id)} size="small">
+                  <IconButton onClick={() => { console.log('1 ', Date.now()); onDelete(row.id); console.log('3 ', Date.now());}} size="small">
                     <DeleteIcon />
                   </IconButton>
                 </Tooltip>
@@ -93,4 +65,4 @@ export function InfiniteLoadingTable({
       </Table>
     </TableContainer>
   );
-}
+})

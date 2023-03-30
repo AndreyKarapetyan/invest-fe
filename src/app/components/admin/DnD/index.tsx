@@ -1,14 +1,19 @@
 import { AllStudents } from './AllStudents';
 import { allStudents, groupMockData } from './mockData';
-import { Box, Grid } from '@mui/material';
+import { Box, Grid, InputAdornment } from '@mui/material';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { TeacherGroup } from './TeacherGroup';
 import { useState } from 'react';
 import { deepClone } from 'src/app/utils/deepClone';
+import { Search } from '@mui/icons-material';
+import { SearchField } from '../../SearchField';
+import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
 
 export function DnD() {
   const [groups, setGroups] = useState(groupMockData);
   const [studentList, setStudentList] = useState(allStudents);
+
+  // const gridRef = useInfiniteLoading({ hasMore: true, isLoading: false, loadMore });
 
   const onDragEnd = ({ destination, draggableId, source }: DropResult) => {
     if (!destination) {
@@ -65,7 +70,7 @@ export function DnD() {
           container
           direction="column"
           width="40%"
-          justifyContent="center"
+          justifyContent="flex-start"
           alignItems="center"
         >
           <Box component="h2">Groups</Box>
@@ -81,6 +86,9 @@ export function DnD() {
           alignItems="center"
         >
           <Box component="h2">List of Students</Box>
+          <SearchField
+            sx={{ marginY: 3, marginX: 2, width: '52%', minWidth: '250px' }}
+          />
           <AllStudents students={allStudentsList} />
         </Grid>
       </Grid>

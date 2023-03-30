@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Api } from 'src/app/utils/Api';
 
 export function useGetTeacherGroups() {
@@ -6,7 +6,7 @@ export function useGetTeacherGroups() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const getTeacherGroups = (teacherId: number) => {
+  const getTeacherGroups = useCallback((teacherId: number) => {
     (async function () {
       try {
         setLoading(true);
@@ -20,7 +20,7 @@ export function useGetTeacherGroups() {
         setLoading(false);
       }
     })();
-  };
+  }, []);
 
   return {
     groups: data,

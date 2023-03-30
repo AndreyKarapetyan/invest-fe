@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Api } from 'src/app/utils/Api';
 
 export function useCreateStudent() {
@@ -6,7 +6,7 @@ export function useCreateStudent() {
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const createStudent = (data: any) => {
+  const createStudent = useCallback((data: any) => {
     (async function () {
       try {
         setLoading(true);
@@ -18,7 +18,7 @@ export function useCreateStudent() {
         setLoading(false);
       }
     })();
-  };
+  }, []);
 
   const resetStudentCreationSuccess = () => {
     setIsSuccess(false);

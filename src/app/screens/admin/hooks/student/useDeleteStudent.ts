@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Api } from 'src/app/utils/Api';
 
 export function useDeleteStudent() {
@@ -6,7 +6,7 @@ export function useDeleteStudent() {
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const deleteStudent = (studentId: number) => {
+  const deleteStudent = useCallback((studentId: number) => {
     (async function () {
       try {
         setLoading(true);
@@ -18,7 +18,7 @@ export function useDeleteStudent() {
         setLoading(false);
       }
     })();
-  };
+  }, []);
 
   const resetStudentDeleteSuccess = () => {
     setIsSuccess(false);

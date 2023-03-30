@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Api } from 'src/app/utils/Api';
 
 export function useGetBranches() {
@@ -6,7 +6,7 @@ export function useGetBranches() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const getBranches = () => {
+  const getBranches = useCallback(() => {
     (async function () {
       try {
         setLoading(true);
@@ -18,7 +18,7 @@ export function useGetBranches() {
         setLoading(false);
       }
     })();
-  };
+  }, []);
 
   return {
     branches: data,

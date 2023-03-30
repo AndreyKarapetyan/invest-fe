@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Api } from 'src/app/utils/Api';
 
 export function useGetStudents() {
@@ -9,7 +9,7 @@ export function useGetStudents() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const getStudents = (branchName: null | string, isReset = false) => {
+  const getStudents = useCallback((branchName: null | string, isReset = false) => {
     if (isReset) {
       setSkip(0);
       setHasMore(true);
@@ -24,17 +24,19 @@ export function useGetStudents() {
             branch: { branchName },
           },
         });
-        const newData = isReset ? response.data : data.concat(response.data);
-        setData(newData);
-        setSkip((skip) => skip + take);
-        setHasMore(newData.length < response.count);
+        setData((prevData) => {
+          const newData = isReset ? response.data : prevData.concat(response.data);
+          setHasMore(newData.length < response.count);
+          return newData;
+        });
+        setSkip((prevSkip) => isReset ? take : prevSkip + take);
       } catch (err: any) {
         setError(err);
       } finally {
         setLoading(false);
       }
     })();
-  };
+  }, [skip]);
 
   const resetStudents = () => {
     setSkip(0);

@@ -1,10 +1,10 @@
 import { Box } from '@mui/material';
-import { Draggable } from 'react-beautiful-dnd';
+import { Draggable, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 
 export function TeacherStudent({ student: { id, name }, index }: any) {
   return (
     <Draggable draggableId={`${id}`} index={index}>
-      {(provided) => (
+      {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
         <Box
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -15,7 +15,7 @@ export function TeacherStudent({ student: { id, name }, index }: any) {
             borderRadius: '50%',
             padding: '10px',
             textAlign: 'center',
-            backgroundColor: 'white'
+            backgroundColor: snapshot.isDragging ? '#ebf5ef' : 'white'
           }}
         >
           {name}

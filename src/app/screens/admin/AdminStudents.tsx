@@ -9,11 +9,10 @@ import {
   LinearProgress,
 } from '@mui/material';
 import { ConfirmationDialog } from 'src/app/components/Confirmation';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { Search } from '@mui/icons-material';
-import { SearchField } from './styled';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import {
   useCreateStudent,
@@ -22,6 +21,7 @@ import {
   useUpdateStudent,
 } from './hooks/student';
 import { useGetTeachers, useGetTeacherGroups } from './hooks/teacher';
+import { SearchField } from 'src/app/components/SearchField';
 
 const columns = [
   { label: 'Id', name: 'id' },
@@ -65,16 +65,16 @@ export function AdminStudents() {
   const loadingTimeOut = useRef<any>();
   const currentBranch = useContext(BranchContext);
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     getStudents(currentBranch);
-  };
+  }, [currentBranch, getStudents]);
 
-  const handleDialogClose = () => {
+  const handleDialogClose = useCallback(() => {
     setDialogOpen(false);
     setStudent(null);
-  };
+  }, []);
 
-  const handleDialogOpen = (studentData?: any) => {
+  const handleDialogOpen = useCallback((studentData?: any) => {
     if (studentData) {
       setStudent(studentData);
       if (studentData.teacherId) {
@@ -83,28 +83,28 @@ export function AdminStudents() {
     }
     getTeachers(currentBranch);
     setDialogOpen(true);
-  };
+  }, [currentBranch, getTeacherGroups, getTeachers]);
 
-  const handleDialogSubmit = (studentData: any) => {
+  const handleDialogSubmit = useCallback((studentData: any) => {
     if (studentData.id) {
       updateStudent(studentData);
     } else {
       createStudent({ ...studentData, branchName: currentBranch });
     }
-  };
+  }, [currentBranch]);
 
-  const handleDeleteOpen = (studentId: number) => {
+  const handleDeleteOpen = useCallback((studentId: number) => {
     setDeletableStudent(studentId);
-  };
+  }, []);
 
-  const handleDeleteClose = () => {
+  const handleDeleteClose = useCallback(() => {
     setDeletableStudent(null);
-  };
+  }, []);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     deleteStudent(deletableStudent as number);
     setDeletableStudent(null);
-  };
+  }, [deletableStudent]);
 
   useEffect(() => {
     if (currentBranch) {
@@ -147,23 +147,8 @@ export function AdminStudents() {
 
   return (
     <Fragment>
-      <Grid
-        container
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <SearchField
-          sx={{ marginY: 3, marginX: 2 }}
-          placeholder="Search..."
-          variant="outlined"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-        />
+      <Grid container justifyContent="space-between" alignItems="center">
+        <SearchField sx={{ marginY: 3, marginX: 2, width: '60vh' }} />
         <Button
           sx={{
             marginY: 3,

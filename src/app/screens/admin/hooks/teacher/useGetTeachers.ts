@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Api } from 'src/app/utils/Api';
 
 export function useGetTeachers() {
@@ -6,7 +6,7 @@ export function useGetTeachers() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const getTeachers = (branchName: null | string) => {
+  const getTeachers = useCallback((branchName: null | string) => {
     (async function () {
       try {
         setLoading(true);
@@ -20,7 +20,7 @@ export function useGetTeachers() {
         setLoading(false);
       }
     })();
-  };
+  }, []);
 
   return {
     teachers: data,

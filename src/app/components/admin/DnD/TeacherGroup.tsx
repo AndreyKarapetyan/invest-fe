@@ -1,11 +1,15 @@
 import { Grid, TextField } from '@mui/material';
-import { Droppable } from 'react-beautiful-dnd';
+import {
+  Droppable,
+  DroppableProvided,
+  DroppableStateSnapshot,
+} from 'react-beautiful-dnd';
 import { TeacherStudent } from './TeacherStudent';
 
 export function TeacherGroup({ group: { id, name, students } }: any) {
   return (
     <Droppable droppableId={`${id}`}>
-      {(provided) => (
+      {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
         <Grid
           ref={provided.innerRef}
           {...provided.droppableProps}
@@ -18,6 +22,7 @@ export function TeacherGroup({ group: { id, name, students } }: any) {
           minWidth="300px"
           maxWidth="400px"
           marginBottom="100px"
+          bgcolor={snapshot.isDraggingOver ? '#faf5f5' : 'white'}
         >
           <TextField
             variant="standard"
@@ -26,7 +31,7 @@ export function TeacherGroup({ group: { id, name, students } }: any) {
             value={name}
           />
           {students.map((student: any, index: any) => (
-            <TeacherStudent key={student.id} student={student} index={index}/>
+            <TeacherStudent key={student.id} student={student} index={index} />
           ))}
           {provided.placeholder}
         </Grid>

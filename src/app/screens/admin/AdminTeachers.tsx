@@ -13,10 +13,10 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { Search } from '@mui/icons-material';
-import { SearchField } from './styled';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import { useDeleteTeacher, useGetTeachers } from './hooks/teacher';
 import { AdminTeacherDialog } from 'src/app/components/admin/AdminTeacherDialog';
+import { SearchField } from 'src/app/components/SearchField';
 
 const columns = [
   { label: 'Id', name: 'id' },
@@ -122,23 +122,8 @@ export function AdminTeachers() {
 
   return (
     <Fragment>
-      <Grid
-        container
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <SearchField
-          sx={{ marginY: 3, marginX: 2 }}
-          placeholder="Search..."
-          variant="outlined"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-        />
+      <Grid container justifyContent="space-between" alignItems="center">
+        <SearchField sx={{ marginY: 3, marginX: 2, width: '60vh' }} />
         <Button
           sx={{
             marginY: 3,
