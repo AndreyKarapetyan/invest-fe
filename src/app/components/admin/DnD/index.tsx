@@ -1,19 +1,87 @@
 import { AllStudents } from './AllStudents';
-import { allStudents, groupMockData } from './mockData';
-import { Box, Grid, InputAdornment } from '@mui/material';
+import { groupMockData } from './mockData';
+import { Box, Button, Grid } from '@mui/material';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { TeacherGroup } from './TeacherGroup';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { deepClone } from 'src/app/utils/deepClone';
-import { Search } from '@mui/icons-material';
 import { SearchField } from '../../SearchField';
 import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
+import { useGetStudents } from 'src/app/screens/admin/hooks/student';
+import AddIcon from '@mui/icons-material/Add';
+
+// @TODO: can we get around without deepClone, instead using setState with function?
+// @TODO: groupId as key
 
 export function DnD() {
   const [groups, setGroups] = useState(groupMockData);
-  const [studentList, setStudentList] = useState(allStudents);
+  // const [studentList, setStudentList] = useState(allStudents);
+  const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
 
-  // const gridRef = useInfiniteLoading({ hasMore: true, isLoading: false, loadMore });
+  const loadMore = useCallback(() => {
+    getStudents('Artashat');
+  }, [getStudents]);
+
+  const gridRef = useInfiniteLoading({
+    hasMore,
+    isLoading: studentsLoading,
+    loadMore,
+  });
+
+  const handleGroupNameChange = (groupId: number, newName: string) => {
+    const groupsCopy = deepClone(groups);
+    const groupIndex = groupsCopy.findIndex((group) => group.id === groupId);
+    groupsCopy[groupIndex].name = newName;
+    setGroups(groupsCopy);
+  };
+
+  const handleGroupDelete = (groupId: number) => {
+    const groupsCopy = deepClone(groups);
+    const groupIndex = groupsCopy.findIndex((group) => group.id === groupId);
+    groupsCopy.splice(groupIndex, 1);
+    setGroups(groupsCopy);
+  };
+
+  const handleGroupCreate = () => {
+    const groupsCopy = deepClone(groups);
+    groupsCopy.push({
+      id: -Math.round(Math.random() * 10 ** 6),
+      name: '',
+      students: [],
+    });
+    setGroups(groupsCopy);
+  };
+
+  useEffect(() => {
+    getStudents('Artashat', true);
+  }, []);
+
+  useEffect(() => {
+    const allStudentsGroup = groups.find(({ id }) => id === 'studentList');
+    if (!allStudentsGroup) {
+      setGroups((curGroups) => [
+        ...curGroups,
+        { id: 'studentList', students } as any,
+      ]);
+    }
+    setGroups((curGroups) => {
+      const curStudentIds = curGroups
+        .flatMap(({ students }) => students.map(({ id }) => id))
+        .reduce((acc: any, id) => {
+          acc[id] = true;
+          return acc;
+        }, {});
+      const added = students.filter(({ id }) => !curStudentIds[id]);
+      const curGroupsCopy = deepClone(curGroups);
+      const studentGroupIndex = curGroupsCopy.findIndex(
+        (group) => group.id === 'studentList'
+      );
+      const existingStudents = curGroupsCopy[studentGroupIndex].students as any;
+      const updatedStudents = [...existingStudents, ...added];
+      curGroupsCopy[studentGroupIndex].students = updatedStudents;
+      return curGroupsCopy;
+    });
+  }, [students]);
 
   const onDragEnd = ({ destination, draggableId, source }: DropResult) => {
     if (!destination) {
@@ -63,97 +131,67 @@ export function DnD() {
         container
         direction="row"
         flexWrap="wrap"
-        justifyContent="space-evenly"
+        justifyContent="space-between"
         height="800px"
       >
         <Grid
           container
           direction="column"
-          width="40%"
+          width="50%"
           justifyContent="flex-start"
           alignItems="center"
         >
           <Box component="h2">Groups</Box>
-          {teacherGroups.map((group) => (
-            <TeacherGroup key={group.id} group={group} />
-          ))}
+          <Grid container justifyContent="space-around" alignItems="center">
+            {teacherGroups.map((group) => (
+              <TeacherGroup
+                key={group.id}
+                group={group}
+                handleGroupNameChange={handleGroupNameChange}
+                handleGroupDelete={handleGroupDelete}
+              />
+            ))}
+          </Grid>
+          <Button
+            sx={{
+              width: '200px',
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
+            }}
+            variant="contained"
+            onClick={handleGroupCreate}
+            startIcon={<AddIcon />}
+          >
+            New Group
+          </Button>
         </Grid>
         <Grid
           container
           direction="column"
-          width="40%"
+          width="50%"
           justifyContent="flex-start"
           alignItems="center"
+          paddingLeft="10%"
         >
           <Box component="h2">List of Students</Box>
           <SearchField
             sx={{ marginY: 3, marginX: 2, width: '52%', minWidth: '250px' }}
           />
-          <AllStudents students={allStudentsList} />
+          <Grid
+            ref={gridRef}
+            sx={{ overflow: 'auto' }}
+            maxHeight="60vh"
+            border="1px solid black"
+            borderRadius="15px"
+            paddingX="20px"
+            paddingBottom="20px"
+            width="300px"
+            minHeight="150px"
+          >
+            <AllStudents students={allStudentsList} />
+          </Grid>
         </Grid>
       </Grid>
     </DragDropContext>
   );
 }
-
-// import React, { useState } from 'react';
-// import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-// import Grid from '@mui/material/Grid';
-// import Box from '@mui/material/Box';
-
-// const initialItems = [
-//   { id: '1', content: 'Item 1' },
-//   { id: '2', content: 'Item 2' },
-//   { id: '3', content: 'Item 3' },
-//   { id: '4', content: 'Item 4' },
-// ];
-
-// export function DnD() {
-//   const [items, setItems] = useState(initialItems);
-
-//   const onDragEnd = (result: any) => {
-//     if (!result.destination) return;
-
-//     const newItems = [...items];
-//     const [reorderedItem] = newItems.splice(result.source.index, 1);
-//     newItems.splice(result.destination.index, 0, reorderedItem);
-
-//     setItems(newItems);
-//   };
-
-//   return (
-//     <Grid container justifyContent="center">
-//       <Grid item xs={6}>
-//         <DragDropContext onDragEnd={onDragEnd}>
-//           <Droppable droppableId="items">
-//             {(provided) => (
-//               <Box ref={provided.innerRef} {...provided.droppableProps} sx={{ width: '100%' }}>
-//                 {items.map(({ id, content }, index) => (
-//                   <Draggable key={id} draggableId={id} index={index}>
-//                     {(provided) => (
-//                       <Box
-//                         ref={provided.innerRef}
-//                         {...provided.draggableProps}
-//                         {...provided.dragHandleProps}
-//                         sx={{
-//                           border: '1px solid black',
-//                           borderRadius: '5px',
-//                           padding: '10px',
-//                           marginY: '5px',
-//                           background: 'white',
-//                         }}
-//                       >
-//                         {content}
-//                       </Box>
-//                     )}
-//                   </Draggable>
-//                 ))}
-//                 {provided.placeholder}
-//               </Box>
-//             )}
-//           </Droppable>
-//         </DragDropContext>
-//       </Grid>
-//     </Grid>
-//   );
-// }

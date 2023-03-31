@@ -32,21 +32,18 @@ export const groupMockData = [
     ],
   },
   {
-    id: 'studentList',
+    id: 3,
+    name: 'Third group',
     students: [
       {
         id: 6,
         name: 'Gevorg Israyelyan',
       },
-      {
-        id: 7,
-        name: 'Natali Grigoryan',
-      },
-      {
-        id: 8,
-        name: 'Vahe Saroyan',
-      },
-    ]
+    ],
+  },
+  {
+    id: 'studentList',
+    students: []
   }
 ];
 

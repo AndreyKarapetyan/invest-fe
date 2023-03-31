@@ -12,7 +12,7 @@ export function TeacherStudent({ student: { id, name }, index }: any) {
           sx={{
             marginTop: '30px',
             border: '1px solid black',
-            borderRadius: '50%',
+            borderRadius: '20px',
             padding: '10px',
             textAlign: 'center',
             backgroundColor: snapshot.isDragging ? '#ebf5ef' : 'white'

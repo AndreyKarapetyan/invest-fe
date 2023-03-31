@@ -107,7 +107,7 @@ export function AdminTeacher(props: any) {
   return (
     <Box
       sx={{
-        width: '80%',
+        width: '90%',
         maxHeight: '90vh',
         marginX: 'auto',
         marginTop: 3,

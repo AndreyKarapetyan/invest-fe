@@ -33,7 +33,7 @@ export const InfiniteLoadingTable = memo(function InfiniteLoadingTable({
         <TableHead>
           <TableRow>
             {columns.map((column: any) => (
-              <TableCell>{column.label}</TableCell>
+              <TableCell key={column.label}>{column.label}</TableCell>
             ))}
             <TableCell />
             <TableCell />
@@ -43,7 +43,7 @@ export const InfiniteLoadingTable = memo(function InfiniteLoadingTable({
           {rows.map((row: any) => (
             <TableRow key={row.id} hover>
               {columns.map((column: any) => (
-                <TableCell>{row[column.name]}</TableCell>
+                <TableCell key={`${row.id} ${column.label}`}>{row[column.name]}</TableCell>
               ))}
               <TableCell>
                 <Tooltip title="Edit">
@@ -54,7 +54,7 @@ export const InfiniteLoadingTable = memo(function InfiniteLoadingTable({
               </TableCell>
               <TableCell>
                 <Tooltip title="Delete">
-                  <IconButton onClick={() => { console.log('1 ', Date.now()); onDelete(row.id); console.log('3 ', Date.now());}} size="small">
+                  <IconButton onClick={() => onDelete(row.id)} size="small">
                     <DeleteIcon />
                   </IconButton>
                 </Tooltip>

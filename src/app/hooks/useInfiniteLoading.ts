@@ -1,5 +1,5 @@
 import { debounce } from '@mui/material';
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 interface UseInfiniteLoadingProps {
   hasMore: boolean;
@@ -17,8 +17,7 @@ export function useInfiniteLoading({
 
   const scrollListener = useCallback(
     debounce(() => {
-      const bottom =
-        containerRef.current.scrollHeight - containerRef.current.clientHeight;
+      const bottom = containerRef.current.scrollHeight - containerRef.current.clientHeight;
       if (!distanceBottom) {
         setDistanceBottom(Math.round(bottom * 0.2));
       }
@@ -30,13 +29,17 @@ export function useInfiniteLoading({
       ) {
         loadMore();
       }
-    }, 50),
+    }, 10),
     [hasMore, loadMore, isLoading, distanceBottom]
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const container = containerRef.current;
     container.addEventListener('scroll', scrollListener);
+    if (!distanceBottom) {
+      const bottom = container.scrollHeight - container.clientHeight;
+      setDistanceBottom(Math.round(bottom * 0.2));
+    }
     return () => {
       container.removeEventListener('scroll', scrollListener);
     };

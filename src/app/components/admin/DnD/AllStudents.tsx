@@ -9,16 +9,7 @@ export function AllStudents({ students }: any) {
         <Grid
           ref={provided.innerRef}
           {...provided.droppableProps}
-          border="1px solid black"
-          borderRadius="15px"
-          paddingX="20px"
-          paddingBottom="20px"
-          width="25%"
-          minWidth="300px"
-          maxWidth="400px"
           bgcolor={snapshot.isDraggingOver ? '#faf5f5' : 'white'}
-          maxHeight="60vh"
-          sx={{ overflow: 'auto' }}
         >
           {students.map((student: any, index: number) => (
             <TeacherStudent key={student.id} student={student} index={index}/>
