@@ -1,6 +1,6 @@
-export const groupMockData = [
-  {
-    id: 1,
+export const groupMockData = {
+  '1': {
+    id: '1',
     name: 'Cool group',
     students: [
       {
@@ -17,8 +17,8 @@ export const groupMockData = [
       },
     ],
   },
-  {
-    id: 2,
+  '2': {
+    id: '2',
     name: 'Second group',
     students: [
       {
@@ -31,8 +31,8 @@ export const groupMockData = [
       },
     ],
   },
-  {
-    id: 3,
+  '3': {
+    id: '3',
     name: 'Third group',
     students: [
       {
@@ -41,23 +41,8 @@ export const groupMockData = [
       },
     ],
   },
-  {
+  'studentList': {
     id: 'studentList',
     students: []
   }
-];
-
-export const allStudents = [
-  {
-    id: 6,
-    name: 'Gevorg Israyelyan',
-  },
-  {
-    id: 7,
-    name: 'Natali Grigoryan',
-  },
-  {
-    id: 8,
-    name: 'Vahe Saroyan',
-  },
-];
+};

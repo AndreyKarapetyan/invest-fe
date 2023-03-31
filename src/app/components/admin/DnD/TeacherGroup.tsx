@@ -13,7 +13,7 @@ export function TeacherGroup({
   handleGroupDelete,
 }: any) {
   return (
-    <Droppable droppableId={`${id}`}>
+    <Droppable droppableId={id}>
       {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
         <Grid
           ref={provided.innerRef}

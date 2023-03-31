@@ -1,20 +1,18 @@
+import AddIcon from '@mui/icons-material/Add';
 import { AllStudents } from './AllStudents';
-import { groupMockData } from './mockData';
 import { Box, Button, Grid } from '@mui/material';
+import { deepClone } from 'src/app/utils/deepClone';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
+import { groupMockData } from './mockData';
+import { SearchField } from '../../SearchField';
 import { TeacherGroup } from './TeacherGroup';
 import { useCallback, useEffect, useState } from 'react';
-import { deepClone } from 'src/app/utils/deepClone';
-import { SearchField } from '../../SearchField';
-import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
 import { useGetStudents } from 'src/app/screens/admin/hooks/student';
-import AddIcon from '@mui/icons-material/Add';
-
-// @TODO: groupId as key
+import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
+import { v4 as uuid } from 'uuid';
 
 export function DnD() {
-  const [groups, setGroups] = useState(groupMockData);
-  // const [studentList, setStudentList] = useState(allStudents);
+  const [groups, setGroups] = useState<any>(groupMockData);
   const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
 
   const loadMore = useCallback(() => {
@@ -27,27 +25,26 @@ export function DnD() {
     loadMore,
   });
 
-  const handleGroupNameChange = (groupId: number, newName: string) => {
+  const handleGroupNameChange = (groupId: string, newName: string) => {
     const groupsCopy = deepClone(groups);
-    const groupIndex = groupsCopy.findIndex((group) => group.id === groupId);
-    groupsCopy[groupIndex].name = newName;
+    groupsCopy[groupId].name = newName;
     setGroups(groupsCopy);
   };
 
   const handleGroupDelete = (groupId: number) => {
     const groupsCopy = deepClone(groups);
-    const groupIndex = groupsCopy.findIndex((group) => group.id === groupId);
-    groupsCopy.splice(groupIndex, 1);
+    delete groupsCopy[groupId];
     setGroups(groupsCopy);
   };
 
   const handleGroupCreate = () => {
     const groupsCopy = deepClone(groups);
-    groupsCopy.push({
-      id: -Math.round(Math.random() * 10 ** 6),
+    const newGroupId = uuid();
+    groupsCopy[newGroupId] = {
+      id: newGroupId,
       name: '',
       students: [],
-    });
+    };
     setGroups(groupsCopy);
   };
 
@@ -57,27 +54,25 @@ export function DnD() {
 
   useEffect(() => {
     const groupsCopy = deepClone(groups);
-    const studentGroupIndex = groups.findIndex(
-      ({ id }) => id === 'studentList'
-    );
-    if (studentGroupIndex < 0) {
-      groupsCopy.push({ id: 'studentList', students } as any);
+    const studentGroup = groupsCopy['studentList'];
+    if (!studentGroup) {
+      groupsCopy['studentList'] = { id: 'studentList', students };
     } else {
-      const curStudentIds = groupsCopy
-        .flatMap(({ students }) => students.map(({ id }) => id))
+      const curStudentIds = Object.values(groupsCopy)
+        .flatMap(({ students }: any) => students.map(({ id }: any) => id))
         .reduce((acc: any, id) => {
           acc[id] = true;
           return acc;
         }, {});
       const added = students.filter(({ id }) => !curStudentIds[id]);
-      const existingStudents = groupsCopy[studentGroupIndex].students as any;
+      const existingStudents = studentGroup.students;
       const updatedStudents = [...existingStudents, ...added];
-      groupsCopy[studentGroupIndex].students = updatedStudents;
+      groupsCopy['studentList'].students = updatedStudents;
     }
     setGroups(groupsCopy);
   }, [students]);
 
-  const onDragEnd = ({ destination, draggableId, source }: DropResult) => {
+  const onDragEnd = ({ destination, source }: DropResult) => {
     if (!destination) {
       return;
     }
@@ -86,36 +81,27 @@ export function DnD() {
         return;
       }
       const groupsCopy = deepClone(groups);
-      const sourceGroupIndex = groupsCopy.findIndex(
-        (group) => group.id.toString() === source.droppableId
-      );
-      const students = groupsCopy[sourceGroupIndex].students;
+      const students = groupsCopy[source.droppableId].students;
       const [reorderedItem] = students.splice(source.index, 1);
       students.splice(destination.index, 0, reorderedItem);
-      groupsCopy[sourceGroupIndex].students = students;
+      groupsCopy[source.droppableId].students = students;
       setGroups(groupsCopy);
     } else {
       const groupsCopy = deepClone(groups);
-      const sourceGroupIndex = groupsCopy.findIndex(
-        (group) => group.id.toString() === source.droppableId
-      );
-      const sourceStudents = groupsCopy[sourceGroupIndex].students;
+      const sourceStudents = groupsCopy[source.droppableId].students;
       const [reorderedItem] = sourceStudents.splice(source.index, 1);
-      const destinationGroupIndex = groupsCopy.findIndex(
-        (group) => group.id.toString() === destination.droppableId
-      );
-      const destinationStudents = groupsCopy[destinationGroupIndex].students;
+      const destinationStudents = groupsCopy[destination.droppableId].students;
       destinationStudents.splice(destination.index, 0, reorderedItem);
-      groupsCopy[sourceGroupIndex].students = sourceStudents;
-      groupsCopy[destinationGroupIndex].students = destinationStudents;
+      groupsCopy[source.droppableId].students = sourceStudents;
+      groupsCopy[destination.droppableId].students = destinationStudents;
       setGroups(groupsCopy);
     }
   };
 
-  const teacherGroups = groups.filter((group) => group.id !== 'studentList');
-  const allStudentsList = groups.filter(
-    (group) => group.id === 'studentList'
-  )[0].students;
+  const teacherGroups = Object.values(groups).filter(
+    (group: any) => group.id !== 'studentList'
+  );
+  const allStudentsList = groups['studentList'].students;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -140,7 +126,7 @@ export function DnD() {
             alignItems="center"
             marginY={3}
           >
-            {teacherGroups.map((group) => (
+            {teacherGroups.map((group: any) => (
               <TeacherGroup
                 key={group.id}
                 group={group}
