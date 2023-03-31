@@ -10,7 +10,6 @@ import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
 import { useGetStudents } from 'src/app/screens/admin/hooks/student';
 import AddIcon from '@mui/icons-material/Add';
 
-// @TODO: can we get around without deepClone, instead using setState with function?
 // @TODO: groupId as key
 
 export function DnD() {
@@ -57,30 +56,25 @@ export function DnD() {
   }, []);
 
   useEffect(() => {
-    const allStudentsGroup = groups.find(({ id }) => id === 'studentList');
-    if (!allStudentsGroup) {
-      setGroups((curGroups) => [
-        ...curGroups,
-        { id: 'studentList', students } as any,
-      ]);
-    }
-    setGroups((curGroups) => {
-      const curStudentIds = curGroups
+    const groupsCopy = deepClone(groups);
+    const studentGroupIndex = groups.findIndex(
+      ({ id }) => id === 'studentList'
+    );
+    if (studentGroupIndex < 0) {
+      groupsCopy.push({ id: 'studentList', students } as any);
+    } else {
+      const curStudentIds = groupsCopy
         .flatMap(({ students }) => students.map(({ id }) => id))
         .reduce((acc: any, id) => {
           acc[id] = true;
           return acc;
         }, {});
       const added = students.filter(({ id }) => !curStudentIds[id]);
-      const curGroupsCopy = deepClone(curGroups);
-      const studentGroupIndex = curGroupsCopy.findIndex(
-        (group) => group.id === 'studentList'
-      );
-      const existingStudents = curGroupsCopy[studentGroupIndex].students as any;
+      const existingStudents = groupsCopy[studentGroupIndex].students as any;
       const updatedStudents = [...existingStudents, ...added];
-      curGroupsCopy[studentGroupIndex].students = updatedStudents;
-      return curGroupsCopy;
-    });
+      groupsCopy[studentGroupIndex].students = updatedStudents;
+    }
+    setGroups(groupsCopy);
   }, [students]);
 
   const onDragEnd = ({ destination, draggableId, source }: DropResult) => {
@@ -91,32 +85,30 @@ export function DnD() {
       if (destination.index === source.index) {
         return;
       }
-      const newGroups: typeof groups = deepClone(groups);
-      const sourceGroupIndex = newGroups.findIndex(
+      const groupsCopy = deepClone(groups);
+      const sourceGroupIndex = groupsCopy.findIndex(
         (group) => group.id.toString() === source.droppableId
       );
-      const students = [...newGroups[sourceGroupIndex].students];
+      const students = groupsCopy[sourceGroupIndex].students;
       const [reorderedItem] = students.splice(source.index, 1);
       students.splice(destination.index, 0, reorderedItem);
-      newGroups[sourceGroupIndex].students = students;
-      setGroups(newGroups);
+      groupsCopy[sourceGroupIndex].students = students;
+      setGroups(groupsCopy);
     } else {
-      const newGroups: typeof groups = deepClone(groups);
-      const sourceGroupIndex = newGroups.findIndex(
+      const groupsCopy = deepClone(groups);
+      const sourceGroupIndex = groupsCopy.findIndex(
         (group) => group.id.toString() === source.droppableId
       );
-      const sourceStudents = [...newGroups[sourceGroupIndex].students];
+      const sourceStudents = groupsCopy[sourceGroupIndex].students;
       const [reorderedItem] = sourceStudents.splice(source.index, 1);
-      const destinationGroupIndex = newGroups.findIndex(
+      const destinationGroupIndex = groupsCopy.findIndex(
         (group) => group.id.toString() === destination.droppableId
       );
-      const destinationStudents = [
-        ...newGroups[destinationGroupIndex].students,
-      ];
+      const destinationStudents = groupsCopy[destinationGroupIndex].students;
       destinationStudents.splice(destination.index, 0, reorderedItem);
-      newGroups[sourceGroupIndex].students = sourceStudents;
-      newGroups[destinationGroupIndex].students = destinationStudents;
-      setGroups(newGroups);
+      groupsCopy[sourceGroupIndex].students = sourceStudents;
+      groupsCopy[destinationGroupIndex].students = destinationStudents;
+      setGroups(groupsCopy);
     }
   };
 
@@ -142,7 +134,12 @@ export function DnD() {
           alignItems="center"
         >
           <Box component="h2">Groups</Box>
-          <Grid container justifyContent="space-around" alignItems="center">
+          <Grid
+            container
+            justifyContent="space-around"
+            alignItems="center"
+            marginY={3}
+          >
             {teacherGroups.map((group) => (
               <TeacherGroup
                 key={group.id}
@@ -157,6 +154,7 @@ export function DnD() {
               width: '200px',
               flexShrink: 0,
               whiteSpace: 'nowrap',
+              marginBottom: '50px',
             }}
             variant="contained"
             onClick={handleGroupCreate}
