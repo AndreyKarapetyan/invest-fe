@@ -161,19 +161,7 @@ export function DnD() {
           <SearchField
             sx={{ marginY: 3, marginX: 2, width: '52%', minWidth: '250px' }}
           />
-          <Grid
-            ref={gridRef}
-            sx={{ overflow: 'auto' }}
-            maxHeight="60vh"
-            border="1px solid black"
-            borderRadius="15px"
-            paddingX="20px"
-            paddingBottom="20px"
-            width="300px"
-            minHeight="150px"
-          >
-            <AllStudents students={allStudentsList} />
-          </Grid>
+          <AllStudents gridRef={gridRef} students={allStudentsList} />
         </Grid>
       </Grid>
     </DragDropContext>

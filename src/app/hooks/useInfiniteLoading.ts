@@ -1,5 +1,5 @@
 import { debounce } from '@mui/material';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseInfiniteLoadingProps {
   hasMore: boolean;

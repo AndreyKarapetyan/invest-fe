@@ -1,22 +1,14 @@
 import AddIcon from '@mui/icons-material/Add';
-import { AdminStudentDialog } from 'src/app/components/admin/AdminStudentDialog';
 import { BranchContext } from 'src/app/components/admin/WithBranches';
-import {
-  Button,
-  Fade,
-  Grid,
-  InputAdornment,
-  LinearProgress,
-} from '@mui/material';
+import { Button, Fade, Grid, LinearProgress } from '@mui/material';
 import { ConfirmationDialog } from 'src/app/components/Confirmation';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
-import { Search } from '@mui/icons-material';
+import { SearchField } from 'src/app/components/SearchField';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import { useDeleteTeacher, useGetTeachers } from './hooks/teacher';
-import { AdminTeacherDialog } from 'src/app/components/admin/AdminTeacherDialog';
-import { SearchField } from 'src/app/components/SearchField';
+import { useNavigate } from 'react-router-dom';
 
 const columns = [
   { label: 'Id', name: 'id' },
@@ -25,11 +17,8 @@ const columns = [
 ];
 
 export function AdminTeachers() {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [teacher, setTeacher] = useState<any>(null);
   const [deletableTeacher, setDeletableTeacher] = useState<number | null>(null);
   const [isLoadingShowing, setIsLoadingShowing] = useState(false);
-  // const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
   const { teachers, teachersLoading, getTeachers } = useGetTeachers();
   const {
     teacherDeleteLoading,
@@ -38,33 +27,9 @@ export function AdminTeachers() {
     resetTeacherDeleteSuccess,
     deleteTeacher,
   } = useDeleteTeacher();
-  // const { groups, groupsLoading, getTeacherGroups } = useGetTeacherGroups();
   const loadingTimeOut = useRef<any>();
   const currentBranch = useContext(BranchContext);
-
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-    setTeacher(null);
-  };
-
-  const handleDialogOpen = (teacherData?: any) => {
-    if (teacherData) {
-      setTeacher(teacherData);
-      if (teacherData.id) {
-        // getTeacherGroups(studentData.teacherId);
-      }
-    }
-    // getTeachers(currentBranch);
-    setDialogOpen(true);
-  };
-
-  const handleDialogSubmit = (teacherData: any) => {
-    if (teacherData.id) {
-      // updateStudent(studentData);
-    } else {
-      // createStudent({ ...studentData, branchName: currentBranch });
-    }
-  };
+  const navigate = useNavigate();
 
   const handleDeleteOpen = (teacherId: number) => {
     setDeletableTeacher(teacherId);
@@ -79,22 +44,15 @@ export function AdminTeachers() {
     setDeletableTeacher(null);
   };
 
+  const navigateToTeacherPage = (teacher?: any) => {
+    navigate(teacher ? `./${teacher.id}` : './new', {});
+  };
+
   useEffect(() => {
     if (currentBranch) {
       getTeachers(currentBranch);
     }
   }, [currentBranch]);
-
-  // useEffect(() => {
-  //   if (isStudentCreated || isStudentUpdated) {
-  //     getStudents(currentBranch, true);
-  //     setTimeout(() => {
-  //       resetStudentCreationSuccess();
-  //       resetStudentUpdateSuccess();
-  //     }, 2000);
-  //     setTimeout(() => handleDialogClose(), 500);
-  //   }
-  // }, [isStudentCreated, isStudentUpdated]);
 
   useEffect(() => {
     if (isTeacherDeleted) {
@@ -106,19 +64,13 @@ export function AdminTeachers() {
   }, [isTeacherDeleted]);
 
   useEffect(() => {
-    if (
-      // teacherCreationLoading ||
-      // teacherUpdateLoading ||
-      teacherDeleteLoading
-    ) {
+    if (teacherDeleteLoading) {
       loadingTimeOut.current = setTimeout(() => setIsLoadingShowing(true), 100);
     } else {
       clearTimeout(loadingTimeOut.current);
       setIsLoadingShowing(false);
     }
-  }, [
-    /* teacherCreationLoading, teacherUpdateLoading,  */ teacherDeleteLoading,
-  ]);
+  }, [teacherDeleteLoading]);
 
   return (
     <Fragment>
@@ -134,7 +86,7 @@ export function AdminTeachers() {
             whiteSpace: 'nowrap',
           }}
           variant="outlined"
-          onClick={() => handleDialogOpen()}
+          onClick={() => navigateToTeacherPage()}
           startIcon={<AddIcon />}
         >
           New Teacher
@@ -154,29 +106,13 @@ export function AdminTeachers() {
       <InfiniteLoadingTable
         columns={columns}
         rows={teachers}
-        onEdit={handleDialogOpen}
+        onEdit={navigateToTeacherPage}
         onDelete={handleDeleteOpen}
         hasMore={false}
       />
-      {dialogOpen && (
-        <AdminTeacherDialog
-          teacher={teacher}
-          handleSubmit={handleDialogSubmit}
-          isOpen={dialogOpen}
-          handleClose={handleDialogClose}
-          // teachers={teachers}
-          // teachersLoading={teachersLoading}
-          // groups={groups}
-          // groupsLoading={groupsLoading}
-          // getTeacherGroups={getTeacherGroups}
-        />
+      {isTeacherDeleted && (
+        <TopCenterSnackbar message="Success" open={isTeacherDeleted} />
       )}
-      {/* {(isStudentCreated || isStudentUpdated || isStudentDeleted) && (
-        <TopCenterSnackbar
-          message="Success"
-          open={isStudentCreated || isStudentUpdated || isStudentDeleted}
-        />
-      )} */}
       {deletableTeacher && (
         <ConfirmationDialog
           open={Boolean(deletableTeacher)}

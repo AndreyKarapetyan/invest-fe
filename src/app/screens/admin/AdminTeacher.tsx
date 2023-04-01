@@ -1,45 +1,23 @@
-import { VisibilityOff, Visibility } from '@mui/icons-material';
-import {
-  DialogTitle,
-  IconButton,
-  DialogContent,
-  Grid,
-  InputLabel,
-  OutlinedInput,
-  InputAdornment,
-  DialogActions,
-  Button,
-  Box,
-} from '@mui/material';
-import { useState } from 'react';
+import { Box, Grid } from '@mui/material';
 import { DnD } from 'src/app/components/admin/DnD';
-import {
-  StyledDialog,
-  StyledTextField,
-  StyledFormControl,
-} from 'src/app/components/admin/styled/teacher-dialog';
-import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
+import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
+import { TeacherFormComponents } from 'src/app/components/admin/SimpleFormComponents/TeacherFormComponents';
+import { useCallback, useEffect, useState } from 'react';
+import { useGetTeacher } from './hooks/teacher';
+import { useParams } from 'react-router-dom';
 
 export function AdminTeacher(props: any) {
-  const teacher = null;
-  const [teacherData, setTeacherData] = useState(
-    teacher || {
-      name: null,
-      lastname: null,
-      email: null,
-      password: null,
-      level: null,
-      phoneNumber: null,
-      salaryPercent: null,
-    }
-  );
-  const [showPassword, setShowPassword] = useState(false);
-  // const [teacherOptionsOpen, setTeacherOptionsOpen] = useState(false); // For circular progress
-  // const [groupOptionsOpen, setGroupOptionsOpen] = useState(false);
-  // const [isNewGroup, setIsNewGroup] = useState(!studentData.teacherId);
-  // const [groupFieldOpen, setGroupFieldOpen] = useState(
-  //   Boolean(studentData.teacherId)
-  // );
+  const { teacherId } = useParams();
+  const [teacherData, setTeacherData] = useState({
+    name: '',
+    lastname: '',
+    email: '',
+    password: '',
+    level: '',
+    phoneNumber: '',
+    salaryPercent: '',
+  });
+  const { teacherLoading, teacherError, teacher, getTeacher } = useGetTeacher();
 
   const handleTeacherDataChange = (key: string, value: any) => {
     setTeacherData((curTeacher: any) => ({
@@ -48,63 +26,28 @@ export function AdminTeacher(props: any) {
     }));
   };
 
-  const handleShowPassword = () => {
-    setShowPassword((cur) => !cur);
-  };
-
-  // const handleTeacherOpen = () => {
-  //   setTeacherOptionsOpen(true);
-  // };
-
-  // const handleTeacherClose = () => {
-  //   setTeacherOptionsOpen(false);
-  // };
-
-  // const handleTeacherChange = (_event: any, option: any) => {
-  //   if (option && option.id) {
-  //     handleStudentDataChange('teacherId', option.id);
-  //     getTeacherGroups(option.id);
-  //   } else {
-  //     handleStudentDataChange('teacherId', null);
-  //     handleStudentDataChange('groupId', null);
-  //     handleStudentDataChange('groupName', null);
-  //     setGroupFieldOpen(false);
-  //   }
-  // };
-
-  // const handleGroupChange = (_event: any, option: any) => {
-  //   if (option && option.id) {
-  //     handleStudentDataChange('groupId', option.id);
-  //   } else {
-  //     handleStudentDataChange('groupId', null);
-  //   }
-  // };
-
-  // const handleNewGroupOpen = () => {
-  //   handleStudentDataChange('groupId', null);
-  //   setGroupFieldOpen(true);
-  //   setIsNewGroup(true);
-  // };
-
-  // const handleExistingGroupOpen = () => {
-  //   setGroupFieldOpen(true);
-  //   setIsNewGroup(false);
-  //   handleStudentDataChange('groupName', null);
-  // };
-
-  // const handleGroupOptionsOpen = () => {
-  //   setGroupOptionsOpen(true);
-  // };
-
-  // const handleGroupOptionsClose = () => {
-  //   setGroupOptionsOpen(false);
-  // };
-
-  const onInputChange = ({ target: { name, value } }: any) => {
+  const onInputChange = useCallback(({ target: { name, value } }: any) => {
     handleTeacherDataChange(name, value || null);
-  };
+  }, []);
 
-  return (
+  useEffect(() => {
+    const id = Number(teacherId);
+    if (!isNaN(id) && id > 0) {
+      getTeacher(id);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (teacher) {
+      setTeacherData(teacher);
+    }
+  }, [teacher]);
+
+  console.log(teacherData);
+
+  return teacherLoading ? (
+    <LoadingIndicator open={teacherLoading} />
+  ) : (
     <Box
       sx={{
         width: '90%',
@@ -113,60 +56,27 @@ export function AdminTeacher(props: any) {
         marginTop: 3,
       }}
     >
-    <Grid
-      container
-      direction="row"
-      flexWrap="wrap"
-      justifyContent="space-evenly"
-    >
-      <StyledTextField
-        name="name"
-        label="Name"
-        value={teacherData.name}
-        variant="outlined"
-        required
-        onChange={onInputChange}
-      />
-      <StyledTextField
-        name="lastname"
-        label="Lastname"
-        value={teacherData.lastname}
-        variant="outlined"
-        required
-        onChange={onInputChange}
-      />
-      <StyledTextField
-        name="email"
-        label="Email"
-        value={teacherData.email}
-        variant="outlined"
-        onChange={onInputChange}
-      />
-      <StyledFormControl variant="outlined">
-        <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
-        <OutlinedInput
-          id="outlined-adornment-password"
-          label="Password"
-          name="password"
-          type={showPassword ? 'text' : 'password'}
-          value={teacherData.password}
-          onChange={onInputChange}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={handleShowPassword}
-                // onMouseDown={handleMouseDownPassword}
-                edge="end"
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          }
-        />
-      </StyledFormControl>
-      <DnD />
-    </Grid>
+      <Grid
+        container
+        direction="column"
+        flexWrap="wrap"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Grid
+          width="80%"
+          container
+          direction="row"
+          flexWrap="wrap"
+          justifyContent="space-evenly"
+        >
+          <TeacherFormComponents
+            teacherData={teacherData}
+            onInputChange={onInputChange}
+          />
+        </Grid>
+        <DnD />
+      </Grid>
     </Box>
   );
 }

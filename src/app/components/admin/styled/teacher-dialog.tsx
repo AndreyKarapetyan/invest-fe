@@ -16,11 +16,6 @@ export const formFieldStyles = {
   minWidth: '250px',
 };
 
-export const StyledDialog = styled((props: DialogProps) => <Dialog {...props} maxWidth="xl"/>)(() => ({
-  '& .MuiDialog-paper': {
-    width: '90%',
-  },
-}));
 export const StyledTextField = styled(TextField)(() => formFieldStyles);
 export const StyledFormControl = styled(FormControl)(() => formFieldStyles);
 export const StyledAutoComplete = styled(Autocomplete)(() => formFieldStyles);
