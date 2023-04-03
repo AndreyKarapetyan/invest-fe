@@ -1,6 +1,13 @@
 import AddIcon from '@mui/icons-material/Add';
 import { AllStudents } from './AllStudents';
-import { Box, Button, Grid } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Fade,
+  Grid,
+  LinearProgress,
+} from '@mui/material';
 import { deepClone } from 'src/app/utils/deepClone';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { groupMockData } from './mockData';
@@ -11,17 +18,19 @@ import { useGetStudents } from 'src/app/screens/admin/hooks/student';
 import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
 import { v4 as uuid } from 'uuid';
 
-export function DnD() {
-  const [groups, setGroups] = useState<any>(groupMockData);
-  const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
-
-  const loadMore = useCallback(() => {
-    getStudents('Artashat');
-  }, [getStudents]);
-
+export function DnD({
+  inputGroups,
+  students,
+  hasMore,
+  areStudentsLoading,
+  loadMore,
+  handleGroupChange,
+  shouldUpdateGroupsFromDnD,
+}: any) {
+  const [groups, setGroups] = useState<any>(inputGroups);
   const gridRef = useInfiniteLoading({
     hasMore,
-    isLoading: studentsLoading,
+    isLoading: areStudentsLoading,
     loadMore,
   });
 
@@ -48,30 +57,6 @@ export function DnD() {
     setGroups(groupsCopy);
   };
 
-  useEffect(() => {
-    getStudents('Artashat', true);
-  }, []);
-
-  useEffect(() => {
-    const groupsCopy = deepClone(groups);
-    const studentGroup = groupsCopy['studentList'];
-    if (!studentGroup) {
-      groupsCopy['studentList'] = { id: 'studentList', students };
-    } else {
-      const curStudentIds = Object.values(groupsCopy)
-        .flatMap(({ students }: any) => students.map(({ id }: any) => id))
-        .reduce((acc: any, id) => {
-          acc[id] = true;
-          return acc;
-        }, {});
-      const added = students.filter(({ id }) => !curStudentIds[id]);
-      const existingStudents = studentGroup.students;
-      const updatedStudents = [...existingStudents, ...added];
-      groupsCopy['studentList'].students = updatedStudents;
-    }
-    setGroups(groupsCopy);
-  }, [students]);
-
   const onDragEnd = ({ destination, source }: DropResult) => {
     if (!destination) {
       return;
@@ -97,6 +82,28 @@ export function DnD() {
       setGroups(groupsCopy);
     }
   };
+
+  useEffect(() => {
+    const groupsCopy = deepClone(inputGroups);
+    const studentGroup = groupsCopy['studentList'];
+    const curStudentIds = Object.values(groupsCopy)
+      .flatMap(({ students }: any) => students.map(({ id }: any) => id))
+      .reduce((acc: any, id) => {
+        acc[id] = true;
+        return acc;
+      }, {});
+    const added = students.filter(({ id }: any) => !curStudentIds[id]);
+    const existingStudents = studentGroup.students;
+    const updatedStudents = [...existingStudents, ...added];
+    groupsCopy['studentList'].students = updatedStudents;
+    setGroups(groupsCopy);
+  }, [inputGroups, students]);
+
+  useEffect(() => {
+    if (shouldUpdateGroupsFromDnD) {
+      handleGroupChange(groups);
+    }
+  }, [shouldUpdateGroupsFromDnD])
 
   const teacherGroups = Object.values(groups).filter(
     (group: any) => group.id !== 'studentList'
@@ -161,6 +168,23 @@ export function DnD() {
           <SearchField
             sx={{ marginY: 3, marginX: 2, width: '52%', minWidth: '250px' }}
           />
+          {areStudentsLoading && (
+            <Fade
+              in={areStudentsLoading}
+              style={{
+                transitionDelay: areStudentsLoading ? '100ms' : '0ms',
+              }}
+              unmountOnExit
+            >
+              <LinearProgress
+                sx={{
+                  width: '280px',
+                  position: 'relative',
+                  bottom: '10px',
+                }}
+              />
+            </Fade>
+          )}
           <AllStudents gridRef={gridRef} students={allStudentsList} />
         </Grid>
       </Grid>

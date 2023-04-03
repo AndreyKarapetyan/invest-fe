@@ -1,3 +1,4 @@
+import { useCreateTeacher } from './useCreateTeacher';
 import { useDeleteTeacher } from './useDeleteTeacher';
 import { useGetTeacher } from './useGetTeacher';
 import { useGetTeacherGroups } from './useGetTeacherGroups';
@@ -8,4 +9,5 @@ export {
   useGetTeachers,
   useDeleteTeacher,
   useGetTeacher,
+  useCreateTeacher,
 };

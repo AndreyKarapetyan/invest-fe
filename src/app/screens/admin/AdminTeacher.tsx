@@ -1,14 +1,20 @@
-import { Box, Grid } from '@mui/material';
+import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
+import { Box, Button, Grid } from '@mui/material';
 import { DnD } from 'src/app/components/admin/DnD';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { TeacherFormComponents } from 'src/app/components/admin/SimpleFormComponents/TeacherFormComponents';
 import { useCallback, useEffect, useState } from 'react';
-import { useGetTeacher } from './hooks/teacher';
-import { useParams } from 'react-router-dom';
+import { useGetStudents } from './hooks/student';
+import { useCreateTeacher, useGetTeacher } from './hooks/teacher';
+import { useNavigate, useParams } from 'react-router-dom';
+import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
+import { deepClone } from 'src/app/utils/deepClone';
 
 export function AdminTeacher(props: any) {
-  const { teacherId } = useParams();
+  const { branchName, teacherId } = useParams();
+  const navigate = useNavigate();
   const [teacherData, setTeacherData] = useState({
+    branchName,
     name: '',
     lastname: '',
     email: '',
@@ -16,8 +22,34 @@ export function AdminTeacher(props: any) {
     level: '',
     phoneNumber: '',
     salaryPercent: '',
+    groups: {
+      studentList: {
+        id: 'studentList',
+        name: 'studentList',
+        students: [],
+      },
+    },
   });
   const { teacherLoading, teacherError, teacher, getTeacher } = useGetTeacher();
+  const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
+  const [shouldUpdateGroupsFromDnD, setShouldUpdateGroupsFromDnD] =
+    useState(false);
+  const [shouldSubmit, setShouldSubmit] = useState(false);
+  const {
+    newTeacherId,
+    resetTeacherId,
+    createTeacher,
+    teacherCreateError,
+    teacherCreateLoading,
+  } = useCreateTeacher();
+
+  const goBackToTheList = () => {
+    navigate('/teachers');
+  };
+
+  const loadMore = useCallback(() => {
+    getStudents(branchName as string);
+  }, [getStudents]);
 
   const handleTeacherDataChange = (key: string, value: any) => {
     setTeacherData((curTeacher: any) => ({
@@ -30,23 +62,76 @@ export function AdminTeacher(props: any) {
     handleTeacherDataChange(name, value || null);
   }, []);
 
+  const handleGroupChange = useCallback((newGroups: any) => {
+    setTeacherData((curData) => ({
+      ...curData,
+      groups: newGroups,
+    }));
+    setShouldUpdateGroupsFromDnD(false);
+    setShouldSubmit(true);
+  }, []);
+
+  const handleSubmitStart = () => {
+    setShouldUpdateGroupsFromDnD(true);
+  };
+
   useEffect(() => {
     const id = Number(teacherId);
     if (!isNaN(id) && id > 0) {
       getTeacher(id);
     }
-  }, []);
+  }, [teacherId]);
 
   useEffect(() => {
     if (teacher) {
-      setTeacherData(teacher);
+      setTeacherData({
+        ...teacher,
+        groups: {
+          ...teacher.groups,
+          studentList: {
+            id: 'studentList',
+            students: [],
+          },
+        },
+      });
     }
   }, [teacher]);
 
-  console.log(teacherData);
+  useEffect(() => {
+    getStudents(branchName as string, true);
+  }, []);
 
-  return teacherLoading ? (
-    <LoadingIndicator open={teacherLoading} />
+  useEffect(() => {
+    if (shouldSubmit) {
+      const data = deepClone(teacherData);
+      const groups = Object.values(data.groups)
+        .filter(
+          ({ id, students }) => id !== 'studentList' || students.length === 0
+        )
+        .map(({ name, students }) => ({ name, students }));
+      const submissionData = {
+        ...data,
+        groups,
+      };
+      createTeacher(submissionData);
+      setShouldSubmit(false);
+    }
+  }, [shouldSubmit]);
+
+
+  useEffect(() => {
+    if (newTeacherId) {
+      navigate(`../teachers/${branchName}/${newTeacherId}`);
+      setTimeout(() => {
+        resetTeacherId();
+      }, 2000);
+    }
+  }, [newTeacherId]);
+
+  return teacherLoading || teacherCreateLoading || !students.length ? (
+    <LoadingIndicator
+      open={teacherLoading || teacherCreateLoading || !students.length}
+    />
   ) : (
     <Box
       sx={{
@@ -56,6 +141,40 @@ export function AdminTeacher(props: any) {
         marginTop: 3,
       }}
     >
+      {newTeacherId && (
+        <TopCenterSnackbar message="Success" open={Boolean(newTeacherId)} />
+      )}
+      <Grid container justifyContent="space-between">
+        <Button
+          sx={{
+            marginX: '5%',
+            padding: '10px',
+            marginBottom: '25px',
+            width: '200px',
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}
+          variant="text"
+          onClick={goBackToTheList}
+          startIcon={<KeyboardBackspaceIcon />}
+        >
+          Back To The List
+        </Button>
+        <Button
+          sx={{
+            marginX: '5%',
+            padding: '10px',
+            marginBottom: '25px',
+            width: '200px',
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}
+          variant="text"
+          onClick={handleSubmitStart}
+        >
+          Save Changes
+        </Button>
+      </Grid>
       <Grid
         container
         direction="column"
@@ -75,98 +194,16 @@ export function AdminTeacher(props: any) {
             onInputChange={onInputChange}
           />
         </Grid>
-        <DnD />
+        <DnD
+          hasMore={hasMore}
+          areStudentsLoading={studentsLoading}
+          loadMore={loadMore}
+          students={students}
+          inputGroups={teacherData.groups}
+          handleGroupChange={handleGroupChange}
+          shouldUpdateGroupsFromDnD={shouldUpdateGroupsFromDnD}
+        />
       </Grid>
     </Box>
   );
 }
-
-// import React, { useState } from 'react';
-// import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-// import Grid from '@mui/material/Grid';
-// import Box from '@mui/material/Box';
-// import Dialog from '@mui/material/Dialog';
-// import DialogTitle from '@mui/material/DialogTitle';
-// import DialogContent from '@mui/material/DialogContent';
-// import Button from '@mui/material/Button';
-
-// const initialItems = [
-//   { id: '1', content: 'Item 1' },
-//   { id: '2', content: 'Item 2' },
-//   { id: '3', content: 'Item 3' },
-//   { id: '4', content: 'Item 4' },
-// ];
-
-// interface CustomDraggableItemProps {
-//   content: string;
-//   provided: any;
-// }
-
-// const CustomDraggableItem = React.forwardRef<HTMLDivElement, CustomDraggableItemProps>(
-//   ({ content, provided }, ref) => (
-//     <Box
-//       ref={ref}
-//       {...provided.draggableProps}
-//       {...provided.dragHandleProps}
-//       sx={{
-//         border: '1px solid black',
-//         borderRadius: '5px',
-//         padding: '10px',
-//         marginY: '5px',
-//         background: 'white',
-//       }}
-//     >
-//       {content}
-//     </Box>
-//   )
-// );
-
-// export function AdminTeacherDialog() {
-//   const [items, setItems] = useState(initialItems);
-//   const [open, setOpen] = useState(false);
-
-//   const onDragEnd = (result: any) => {
-//     if (!result.destination) return;
-
-//     const newItems = [...items];
-//     const [reorderedItem] = newItems.splice(result.source.index, 1);
-//     newItems.splice(result.destination.index, 0, reorderedItem);
-
-//     setItems(newItems);
-//   };
-
-//   return (
-//     <Grid container justifyContent="center">
-//       <Grid item>
-//         <Button variant="outlined" onClick={() => setOpen(true)}>
-//           Open Dialog
-//         </Button>
-//       </Grid>
-//       <Dialog
-//         open={open}
-//         onClose={() => setOpen(false)}
-//         keepMounted
-//       >
-//         <DialogTitle>Drag and Drop List</DialogTitle>
-//         <DialogContent>
-//           <DragDropContext onDragEnd={onDragEnd}>
-//             <Droppable droppableId="items">
-//               {(provided) => (
-//                 <Box ref={provided.innerRef} {...provided.droppableProps} sx={{ width: '100%' }}>
-//                   {items.map(({ id, content }, index) => (
-//                     <Draggable key={id} draggableId={id} index={index}>
-//                       {(provided) => (
-//                         <CustomDraggableItem content={content} provided={provided} />
-//                       )}
-//                     </Draggable>
-//                   ))}
-//                   {provided.placeholder}
-//                 </Box>
-//               )}
-//             </Droppable>
-//           </DragDropContext>
-//         </DialogContent>
-//       </Dialog>
-//     </Grid>
-//   );
-// }

@@ -31,7 +31,7 @@ export function App() {
         }
       />
       <Route
-        path="/teachers/:teacherId"
+        path="/teachers/:branchName/:teacherId"
         element={
           <WithSlider>
             <AdminTeacher />

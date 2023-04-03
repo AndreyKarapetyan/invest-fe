@@ -5,15 +5,15 @@ export const groupMockData = {
     students: [
       {
         id: 1,
-        name: 'Gevorg Mkrtchyan',
+        fullName: 'Gevorg Mkrtchyan',
       },
       {
         id: 2,
-        name: 'Gurgen Hovhannisyan',
+        fullName: 'Gurgen Hovhannisyan',
       },
       {
         id: 3,
-        name: 'Liza Karapetyan',
+        fullName: 'Liza Karapetyan',
       },
     ],
   },
@@ -23,11 +23,11 @@ export const groupMockData = {
     students: [
       {
         id: 4,
-        name: 'Artyom Esayan',
+        fullName: 'Artyom Esayan',
       },
       {
         id: 5,
-        name: 'Eline Gevorgyan',
+        fullName: 'Eline Gevorgyan',
       },
     ],
   },
@@ -37,7 +37,7 @@ export const groupMockData = {
     students: [
       {
         id: 6,
-        name: 'Gevorg Israyelyan',
+        fullName: 'Gevorg Israyelyan',
       },
     ],
   },

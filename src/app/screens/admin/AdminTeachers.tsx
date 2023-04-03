@@ -45,7 +45,7 @@ export function AdminTeachers() {
   };
 
   const navigateToTeacherPage = (teacher?: any) => {
-    navigate(teacher ? `./${teacher.id}` : './new', {});
+    navigate(teacher ? `./${currentBranch}/${teacher.id}` : `./${currentBranch}/new`);
   };
 
   useEffect(() => {

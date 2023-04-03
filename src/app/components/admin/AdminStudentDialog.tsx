@@ -285,7 +285,7 @@ export function AdminStudentDialog({
       </DialogContent>
       <DialogActions>
         <Button autoFocus onClick={() => handleSubmit(studentData)}>
-          Save changes
+          Save Changes
         </Button>
       </DialogActions>
     </StyledDialog>
