@@ -14,7 +14,6 @@ const EventDisplay = ({ title, description, height }: any) => {
   return (
     <Box
       sx={{
-        // outline: '1px dashed red',
         backgroundColor: 'rgba(255, 0, 0, 0.3)',
         height: `calc(${height}%)`,
         width: '90%',
@@ -220,14 +219,6 @@ export const Calendar = () => {
     return (endIndex - startIndex) * 100;
   };
 
-  const getEventTop = (start: { hour: number; minute: number }) => {
-    const startIndex = times.findIndex(
-      (slot) => slot.hour === start.hour && slot.minute === start.minute
-    );
-
-    return startIndex * timeSlotHeight;
-  };
-
   return (
     <Grid container justifyContent="center">
       <TableContainer sx={{ width: '60vw', outline: '1px dashed red' }}>
@@ -321,7 +312,6 @@ export const Calendar = () => {
                             title={event.title}
                             description={event.description}
                             height={getEventHeight(event.start, event.end)}
-                            top={getEventTop(event.start)}
                           />
                         )}
                       <EventSelection

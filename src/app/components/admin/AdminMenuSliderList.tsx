@@ -5,6 +5,8 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import StudentsIcon from 'src/assets/student.png';
 import TeachersIcon from 'src/assets/teacher.png';
+import CalendarIcon from 'src/assets/calendar.png';
+
 import { useNavigate } from 'react-router-dom';
 
 const AdminMenuSliderOptions = [
@@ -21,6 +23,13 @@ const AdminMenuSliderOptions = [
     width: '36px',
     height: '36px',
     url: '/students',
+  },
+  {
+    icon: CalendarIcon,
+    text: 'Calendar',
+    width: '30px',
+    height: '30px',
+    url: '/calendar',
   },
 ];
 

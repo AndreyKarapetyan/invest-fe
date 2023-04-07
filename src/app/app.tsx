@@ -40,9 +40,11 @@ export function App() {
         }
       />
       <Route
-        path="/"
+        path="/calendar"
         element={
-          <Calendar/>
+          <WithSlider>
+            <Calendar />
+          </WithSlider>
         }
       />
     </Routes>
