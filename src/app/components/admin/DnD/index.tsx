@@ -13,10 +13,11 @@ import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { groupMockData } from './mockData';
 import { SearchField } from '../../SearchField';
 import { TeacherGroup } from './TeacherGroup';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGetStudents } from 'src/app/screens/admin/hooks/student';
 import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
 import { v4 as uuid } from 'uuid';
+import { isEqual } from 'lodash';
 
 export function DnD({
   inputGroups,
@@ -28,6 +29,7 @@ export function DnD({
   shouldUpdateGroupsFromDnD,
 }: any) {
   const [groups, setGroups] = useState<any>(inputGroups);
+  const previousInputGroups = useRef(null);
   const gridRef = useInfiniteLoading({
     hasMore,
     isLoading: areStudentsLoading,
@@ -51,6 +53,7 @@ export function DnD({
     const newGroupId = uuid();
     groupsCopy[newGroupId] = {
       id: newGroupId,
+      isNew: true,
       name: '',
       students: [],
     };
@@ -84,7 +87,16 @@ export function DnD({
   };
 
   useEffect(() => {
-    const groupsCopy = deepClone(inputGroups);
+    let groupsCopy: any;
+    if (
+      !previousInputGroups.current ||
+      !isEqual(previousInputGroups.current, inputGroups)
+    ) {
+      groupsCopy = deepClone(inputGroups);
+      previousInputGroups.current = inputGroups;
+    } else {
+      groupsCopy = deepClone(groups);
+    }
     const studentGroup = groupsCopy['studentList'];
     const curStudentIds = Object.values(groupsCopy)
       .flatMap(({ students }: any) => students.map(({ id }: any) => id))
@@ -103,7 +115,7 @@ export function DnD({
     if (shouldUpdateGroupsFromDnD) {
       handleGroupChange(groups);
     }
-  }, [shouldUpdateGroupsFromDnD])
+  }, [shouldUpdateGroupsFromDnD]);
 
   const teacherGroups = Object.values(groups).filter(
     (group: any) => group.id !== 'studentList'

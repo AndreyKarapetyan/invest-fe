@@ -5,7 +5,11 @@ import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { TeacherFormComponents } from 'src/app/components/admin/SimpleFormComponents/TeacherFormComponents';
 import { useCallback, useEffect, useState } from 'react';
 import { useGetStudents } from './hooks/student';
-import { useCreateTeacher, useGetTeacher } from './hooks/teacher';
+import {
+  useCreateTeacher,
+  useGetTeacher,
+  useUpdateTeacher,
+} from './hooks/teacher';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import { deepClone } from 'src/app/utils/deepClone';
@@ -42,6 +46,13 @@ export function AdminTeacher(props: any) {
     teacherCreateError,
     teacherCreateLoading,
   } = useCreateTeacher();
+  const {
+    isTeacherUpdated,
+    resetTeacherUpdateSuccess,
+    teacherUpdateError,
+    teacherUpdateLoading,
+    updateTeacher,
+  } = useUpdateTeacher();
 
   const goBackToTheList = () => {
     navigate('/teachers');
@@ -104,33 +115,57 @@ export function AdminTeacher(props: any) {
   useEffect(() => {
     if (shouldSubmit) {
       const data = deepClone(teacherData);
-      const groups = Object.values(data.groups)
-        .filter(
-          ({ id, students }) => id !== 'studentList' || students.length === 0
-        )
-        .map(({ name, students }) => ({ name, students }));
-      const submissionData = {
-        ...data,
-        groups,
-      };
-      createTeacher(submissionData);
+      const groups = Object.values(data.groups).filter(
+        ({ id }) => id !== 'studentList'
+      );
+      if (teacherId === 'new') {
+        const submissionData = {
+          ...data,
+          groups,
+        };
+        createTeacher(submissionData);
+      } else {
+        const id = Number(teacherId);
+        const submissionData = {
+          id,
+          ...data,
+          groups,
+        };
+        updateTeacher(id, submissionData);
+      }
       setShouldSubmit(false);
     }
   }, [shouldSubmit]);
 
-
   useEffect(() => {
     if (newTeacherId) {
-      navigate(`../teachers/${branchName}/${newTeacherId}`);
+      navigate(`../teachers/${branchName}/${newTeacherId}`, { replace: true });
       setTimeout(() => {
         resetTeacherId();
       }, 2000);
     }
   }, [newTeacherId]);
 
-  return teacherLoading || teacherCreateLoading || !students.length ? (
+  useEffect(() => {
+    if (isTeacherUpdated) {
+      getTeacher(Number(teacherId));
+      setTimeout(() => {
+        resetTeacherUpdateSuccess();
+      }, 2000);
+    }
+  }, [isTeacherUpdated]);
+
+  return teacherLoading ||
+    teacherCreateLoading ||
+    teacherUpdateLoading ||
+    !students.length ? (
     <LoadingIndicator
-      open={teacherLoading || teacherCreateLoading || !students.length}
+      open={
+        teacherLoading ||
+        teacherCreateLoading ||
+        teacherUpdateLoading ||
+        !students.length
+      }
     />
   ) : (
     <Box
@@ -141,8 +176,11 @@ export function AdminTeacher(props: any) {
         marginTop: 3,
       }}
     >
-      {newTeacherId && (
-        <TopCenterSnackbar message="Success" open={Boolean(newTeacherId)} />
+      {(newTeacherId || isTeacherUpdated) && (
+        <TopCenterSnackbar
+          message="Success"
+          open={Boolean(newTeacherId) || isTeacherUpdated}
+        />
       )}
       <Grid container justifyContent="space-between">
         <Button

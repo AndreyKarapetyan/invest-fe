@@ -5,6 +5,7 @@ import { AdminTeachers } from './screens/admin/AdminTeachers';
 import { Route, Routes } from 'react-router-dom';
 import { AdminTeacher } from './screens/admin/AdminTeacher';
 import { WithSlider } from './components/admin/WithSlider';
+import { Calendar } from './screens/Calendar';
 
 export function App() {
   return (
@@ -36,6 +37,12 @@ export function App() {
           <WithSlider>
             <AdminTeacher />
           </WithSlider>
+        }
+      />
+      <Route
+        path="/"
+        element={
+          <Calendar/>
         }
       />
     </Routes>
