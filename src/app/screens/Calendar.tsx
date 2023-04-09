@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import moment from 'moment';
+import React, { Fragment, useState } from 'react';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import {
+  Box,
+  Grid,
   Table,
   TableBody,
   TableCell,
   TableContainer,
-  TableRow,
   TableHead,
-  Box,
-  Grid,
+  TableRow,
 } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker';
 
 const EventDisplay = ({ title, description, height }: any) => {
   return (
@@ -71,6 +75,7 @@ export const Calendar = () => {
   const [selectedRoom, setSelectedRoom] = useState<any>(null);
   const [selectedStart, setSelectedStart] = useState<any>(null);
   const [selectedEnd, setSelectedEnd] = useState<any>(null);
+  const [value, setValue] = React.useState<any>(moment());
 
   const events = [
     {
@@ -111,7 +116,7 @@ export const Calendar = () => {
     if (eventAtCurrentPosition) {
       return;
     }
-  
+
     setIsSelecting(true);
     setSelectedRoom(roomIndex);
     setSelectedStart(timeSlot);
@@ -147,9 +152,8 @@ export const Calendar = () => {
       );
 
       if (
-        roomIndex === selectedRoom &&
         !hasEventInSelectionRange(
-          roomIndex,
+          selectedRoom,
           Math.min(selectedIndex, endIndex) + 1,
           Math.max(selectedIndex, endIndex)
         )
@@ -220,10 +224,31 @@ export const Calendar = () => {
   };
 
   return (
-    <Grid container justifyContent="center">
-      
-      <TableContainer sx={{ width: '60vw', marginTop: 3, outline: '1px dashed red' }}>
-        <Table>
+    <Fragment>
+      <LocalizationProvider dateAdapter={AdapterMoment}>
+        <StaticDatePicker
+          sx={{
+            marginTop: 7,
+            position: 'fixed',
+          }}
+          displayStaticWrapperAs="desktop"
+          openTo="day"
+          value={value}
+          onChange={(newValue) => {
+            setValue(newValue);
+          }}
+        />
+      </LocalizationProvider>
+      <TableContainer
+        sx={{
+          userSelect: 'none',
+          width: '60vw',
+          maxHeight: '90vh',
+          marginTop: 3,
+          marginLeft: '350px',
+        }}
+      >
+        <Table stickyHeader>
           <TableHead>
             <TableRow>
               <TableCell sx={{ borderBottom: 'none' }}></TableCell>
@@ -242,18 +267,26 @@ export const Calendar = () => {
             </TableRow>
           </TableHead>
           <TableBody>
+            <TableRow>
+              <TableCell sx={{ borderBottom: 'none' }}></TableCell>
+              {rooms.map((_, index) => (
+                <TableCell
+                  key={index}
+                  sx={{
+                    borderLeft: '1px solid rgba(0, 0, 0, 0.1)',
+                    borderRight: '1px solid rgba(0, 0, 0, 0.1)',
+                  }}
+                ></TableCell>
+              ))}
+            </TableRow>
             {times.map((timeSlot, rowIndex) => (
-              <TableRow
-                key={rowIndex}
-                sx={{ height: `${timeSlotHeight}px` }}
-              >
+              <TableRow key={rowIndex} sx={{ height: `${timeSlotHeight}px` }}>
                 <TableCell
                   onMouseEnter={() => handleMouseEnter(null, timeSlot)}
                   sx={{
                     borderBottom: 'none',
                     position: 'relative',
                     width: '200px',
-                    // outline: '1px dashed red'
                   }}
                 >
                   <Grid
@@ -265,9 +298,11 @@ export const Calendar = () => {
                     <Box
                       sx={{
                         position: 'absolute',
-                        bottom: '22px',
-                        right: rowIndex % 4 === 0 ? '90px' : '45px'
-                      }}>
+                        bottom: '24px',
+                        right: rowIndex % 4 === 0 ? '90px' : '45px',
+                        color: 'rgba(0, 0, 0, 0.6)',
+                      }}
+                    >
                       {rowIndex % 4 === 0 &&
                         `${timeSlot.hour < 10 ? '0' : ''}${timeSlot.hour}:00`}
                       {rowIndex % 4 === 1 &&
@@ -289,7 +324,7 @@ export const Calendar = () => {
                     ></Box>
                   </Grid>
                 </TableCell>
-                {rooms.map((room, colIndex) => {
+                {rooms.map((_, colIndex) => {
                   const event = isEvent(colIndex, timeSlot);
 
                   return (
@@ -336,6 +371,6 @@ export const Calendar = () => {
           </TableBody>
         </Table>
       </TableContainer>
-    </Grid>
+    </Fragment>
   );
 };

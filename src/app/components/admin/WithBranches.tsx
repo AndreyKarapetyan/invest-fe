@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs } from '@mui/material';
-import { createContext, useEffect, useRef, useState } from 'react';
+import { Fragment, createContext, useEffect, useRef, useState } from 'react';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { useGetBranches } from 'src/app/hooks/useGetBranches';
 
@@ -35,32 +35,34 @@ export function WithBranches(props: any) {
   }, [branchesLoading]);
 
   return (
-    <Box
-      sx={{
-        width: '80%',
-        maxHeight: '90vh',
-        marginX: 'auto',
-        marginTop: 3,
-      }}
-    >
-      {currentBranch && (
-        <Tabs
-          sx={{ display: 'flex', justifyContent: 'center' }}
-          value={currentBranch}
-          onChange={handleBranchChange}
-          textColor="secondary"
-          indicatorColor="secondary"
-          aria-label="secondary tabs example"
-        >
-          {branches.map(({ name }) => (
-            <Tab key={name} value={name} label={name} sx={{ flexGrow: 1 }} />
-          ))}
-        </Tabs>
-      )}
-      {isLoadingShowing && <LoadingIndicator open={isLoadingShowing} />}
+    <Fragment>
+      <Box
+        sx={{
+          width: '80%',
+          maxHeight: '90vh',
+          marginX: 'auto',
+          marginTop: 3,
+        }}
+      >
+        {currentBranch && (
+          <Tabs
+            sx={{ display: 'flex', justifyContent: 'center' }}
+            value={currentBranch}
+            onChange={handleBranchChange}
+            textColor="secondary"
+            indicatorColor="secondary"
+            aria-label="secondary tabs example"
+          >
+            {branches.map(({ name }) => (
+              <Tab key={name} value={name} label={name} sx={{ flexGrow: 1 }} />
+            ))}
+          </Tabs>
+        )}
+        {isLoadingShowing && <LoadingIndicator open={isLoadingShowing} />}
+      </Box>
       <BranchContext.Provider value={currentBranch}>
         {props.children}
       </BranchContext.Provider>
-    </Box>
+    </Fragment>
   );
 }

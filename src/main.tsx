@@ -9,11 +9,9 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  // <StrictMode>
     <StyledEngineProvider injectFirst>
       <BrowserRouter>
         <App />
       </BrowserRouter>
     </StyledEngineProvider>
-  // </StrictMode>
 );

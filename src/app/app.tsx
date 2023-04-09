@@ -43,7 +43,9 @@ export function App() {
         path="/calendar"
         element={
           <WithSlider>
-            <Calendar />
+            <WithBranches>
+              <Calendar />
+            </WithBranches>
           </WithSlider>
         }
       />

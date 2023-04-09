@@ -1,23 +1,14 @@
 import AddIcon from '@mui/icons-material/Add';
 import { AllStudents } from './AllStudents';
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Fade,
-  Grid,
-  LinearProgress,
-} from '@mui/material';
+import { Box, Button, Fade, Grid, LinearProgress } from '@mui/material';
 import { deepClone } from 'src/app/utils/deepClone';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
-import { groupMockData } from './mockData';
+import { isEqual } from 'lodash';
 import { SearchField } from '../../SearchField';
 import { TeacherGroup } from './TeacherGroup';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useGetStudents } from 'src/app/screens/admin/hooks/student';
+import { useEffect, useRef, useState } from 'react';
 import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
 import { v4 as uuid } from 'uuid';
-import { isEqual } from 'lodash';
 
 export function DnD({
   inputGroups,

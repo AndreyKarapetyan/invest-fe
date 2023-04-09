@@ -1,27 +1,20 @@
 import AddIcon from '@mui/icons-material/Add';
 import { AdminStudentDialog } from 'src/app/components/admin/AdminStudentDialog';
 import { BranchContext } from 'src/app/components/admin/WithBranches';
-import {
-  Button,
-  Fade,
-  Grid,
-  InputAdornment,
-  LinearProgress,
-} from '@mui/material';
+import { Button, Fade, Grid, LinearProgress } from '@mui/material';
 import { ConfirmationDialog } from 'src/app/components/Confirmation';
-import { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
-import { Search } from '@mui/icons-material';
+import { SearchField } from 'src/app/components/SearchField';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   useCreateStudent,
   useDeleteStudent,
   useGetStudents,
   useUpdateStudent,
 } from './hooks/student';
-import { useGetTeachers, useGetTeacherGroups } from './hooks/teacher';
-import { SearchField } from 'src/app/components/SearchField';
+import { useGetTeacherGroups, useGetTeachers } from './hooks/teacher';
 
 const columns = [
   { label: 'Id', name: 'id' },
@@ -74,24 +67,30 @@ export function AdminStudents() {
     setStudent(null);
   }, []);
 
-  const handleDialogOpen = useCallback((studentData?: any) => {
-    if (studentData) {
-      setStudent(studentData);
-      if (studentData.teacherId) {
-        getTeacherGroups(studentData.teacherId);
+  const handleDialogOpen = useCallback(
+    (studentData?: any) => {
+      if (studentData) {
+        setStudent(studentData);
+        if (studentData.teacherId) {
+          getTeacherGroups(studentData.teacherId);
+        }
       }
-    }
-    getTeachers(currentBranch);
-    setDialogOpen(true);
-  }, [currentBranch, getTeacherGroups, getTeachers]);
+      getTeachers(currentBranch);
+      setDialogOpen(true);
+    },
+    [currentBranch, getTeacherGroups, getTeachers]
+  );
 
-  const handleDialogSubmit = useCallback((studentData: any) => {
-    if (studentData.id) {
-      updateStudent(studentData);
-    } else {
-      createStudent({ ...studentData, branchName: currentBranch });
-    }
-  }, [currentBranch]);
+  const handleDialogSubmit = useCallback(
+    (studentData: any) => {
+      if (studentData.id) {
+        updateStudent(studentData);
+      } else {
+        createStudent({ ...studentData, branchName: currentBranch });
+      }
+    },
+    [currentBranch]
+  );
 
   const handleDeleteOpen = useCallback((studentId: number) => {
     setDeletableStudent(studentId);
@@ -146,7 +145,7 @@ export function AdminStudents() {
   }, [studentCreationLoading, studentUpdateLoading, studentDeleteLoading]);
 
   return (
-    <Fragment>
+    <Grid width="80%" marginX="auto">
       <Grid container justifyContent="space-between" alignItems="center">
         <SearchField sx={{ marginY: 3, marginX: 2, width: '60vh' }} />
         <Button
@@ -212,6 +211,6 @@ export function AdminStudents() {
         />
       )}
       {isLoadingShowing && <LoadingIndicator open={isLoadingShowing} />}
-    </Fragment>
+    </Grid>
   );
 }

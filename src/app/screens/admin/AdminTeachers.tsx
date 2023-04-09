@@ -2,7 +2,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { BranchContext } from 'src/app/components/admin/WithBranches';
 import { Button, Fade, Grid, LinearProgress } from '@mui/material';
 import { ConfirmationDialog } from 'src/app/components/Confirmation';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { SearchField } from 'src/app/components/SearchField';
@@ -73,7 +73,7 @@ export function AdminTeachers() {
   }, [teacherDeleteLoading]);
 
   return (
-    <Fragment>
+    <Grid width="80%" marginX="auto">
       <Grid container justifyContent="space-between" alignItems="center">
         <SearchField sx={{ marginY: 3, marginX: 2, width: '60vh' }} />
         <Button
@@ -122,6 +122,6 @@ export function AdminTeachers() {
         />
       )}
       {isLoadingShowing && <LoadingIndicator open={isLoadingShowing} />}
-    </Fragment>
+    </Grid>
   );
 }
