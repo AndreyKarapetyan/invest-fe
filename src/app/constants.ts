@@ -1,0 +1,1 @@
+export const SLIDER_WIDTH = 240;

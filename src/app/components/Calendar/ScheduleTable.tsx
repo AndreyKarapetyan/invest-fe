@@ -25,7 +25,15 @@ export function ScheduleTable({
       <TableHead>
         <TableRow>
           <TableCell
-            sx={{ borderBottom: 'none', minWidth: '200px' }}
+            sx={{
+              borderBottom: 'none',
+              minWidth: '200px',
+              position: 'sticky',
+              borderRight: '1px solid rgba(0, 0, 0, 0.1)',
+              backgroundColor: 'white',
+              left: 0,
+              zIndex: 10,
+            }}
           ></TableCell>
           {rooms.map((room: any, index: any) => (
             <TableCell
@@ -44,7 +52,16 @@ export function ScheduleTable({
       </TableHead>
       <TableBody>
         <TableRow>
-          <TableCell sx={{ borderBottom: 'none' }}></TableCell>
+          <TableCell
+            sx={{
+              borderBottom: 'none',
+              position: 'sticky',
+              borderRight: '1px solid rgba(0, 0, 0, 0.1)',
+              backgroundColor: 'white',
+              left: 0,
+              zIndex: 1,
+            }}
+          ></TableCell>
           {rooms.map((_: any, index: any) => (
             <TableCell
               key={index}
@@ -63,8 +80,13 @@ export function ScheduleTable({
               sx={{
                 minWidth: '200px',
                 borderBottom: 'none',
-                position: 'relative',
+                // position: 'relative',
                 width: '200px',
+                position: 'sticky',
+                borderRight: '1px solid rgba(0, 0, 0, 0.1)',
+                backgroundColor: 'white',
+                left: 0,
+                zIndex: 1,
               }}
             >
               <Grid

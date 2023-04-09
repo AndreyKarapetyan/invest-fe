@@ -4,6 +4,7 @@ import { Box, TableContainer } from '@mui/material';
 import { DatePicker } from './DatePicker';
 import { events } from './mockData';
 import { ScheduleTable } from './ScheduleTable';
+import { SLIDER_WIDTH } from 'src/app/constants';
 
 export function Calendar() {
   const rooms = [
@@ -175,22 +176,22 @@ export function Calendar() {
       <TableContainer
         sx={{
           userSelect: 'none',
-          width: '75vw',
           maxHeight: '80vh',
+          maxWidth: `calc(100vw - 400px - ${SLIDER_WIDTH}px)`,
           marginTop: 3,
           marginLeft: '350px',
         }}
       >
-        <ScheduleTable
-          rooms={rooms}
-          times={times}
-          handleMouseEnter={handleMouseEnter}
-          isEvent={isEvent}
-          isSelected={isSelected}
-          getEventHeight={getEventHeight}
-          handleMouseDown={handleMouseDown}
-          handleMouseUp={handleMouseUp}
-        />
+          <ScheduleTable
+            rooms={rooms}
+            times={times}
+            handleMouseEnter={handleMouseEnter}
+            isEvent={isEvent}
+            isSelected={isSelected}
+            getEventHeight={getEventHeight}
+            handleMouseDown={handleMouseDown}
+            handleMouseUp={handleMouseUp}
+          />
       </TableContainer>
     </Fragment>
   );

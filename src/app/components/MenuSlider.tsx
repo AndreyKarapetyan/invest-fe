@@ -9,8 +9,7 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-
-const drawerWidth = 240;
+import { SLIDER_WIDTH } from '../constants';
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
   open?: boolean;
@@ -22,7 +21,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  marginLeft: `-${drawerWidth}px`,
+  marginLeft: `-${SLIDER_WIDTH}px`,
   ...(open && {
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.easeOut,
@@ -44,8 +43,8 @@ const AppBar = styled(MuiAppBar, {
     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: `${drawerWidth}px`,
+    width: `calc(100% - ${SLIDER_WIDTH}px)`,
+    marginLeft: `${SLIDER_WIDTH}px`,
     transition: theme.transitions.create(['margin', 'width'], {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
@@ -86,10 +85,10 @@ export function MenuSlider(props: any) {
       </AppBar>
       <Drawer
         sx={{
-          width: drawerWidth,
+          width: SLIDER_WIDTH,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: drawerWidth,
+            width: SLIDER_WIDTH,
             boxSizing: 'border-box',
           },
         }}
