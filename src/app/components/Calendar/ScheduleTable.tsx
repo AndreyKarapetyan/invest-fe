@@ -9,12 +9,19 @@ import {
 } from '@mui/material';
 import { EventDisplay } from './EventDisplay';
 import { EventSelection } from './EventSelection';
+import { TimeSlot, convertToMinutes } from './utils';
+
+interface ScheduleTableProps {
+  rooms: string[];
+  times: { [index: string]: TimeSlot };
+  handleMouseEnter: (_: any, timeSlot: TimeSlot) => void;
+}
 
 export function ScheduleTable({
   rooms,
   times,
   handleMouseEnter,
-  isEvent,
+  getEventAtPosition,
   isSelected,
   getEventHeight,
   handleMouseDown,
@@ -35,9 +42,9 @@ export function ScheduleTable({
               zIndex: 10,
             }}
           ></TableCell>
-          {rooms.map((room: any, index: any) => (
+          {rooms.map((room: any) => (
             <TableCell
-              key={index}
+              key={room}
               sx={{
                 minWidth: '200px',
                 textAlign: 'center',
@@ -62,9 +69,9 @@ export function ScheduleTable({
               zIndex: 1,
             }}
           ></TableCell>
-          {rooms.map((_: any, index: any) => (
+          {rooms.map((room: any, index: any) => (
             <TableCell
-              key={index}
+              key={`_${room}`}
               sx={{
                 minWidth: '200px',
                 borderLeft: '1px solid rgba(0, 0, 0, 0.1)',
@@ -73,14 +80,13 @@ export function ScheduleTable({
             ></TableCell>
           ))}
         </TableRow>
-        {times.map((timeSlot: any, rowIndex: any) => (
-          <TableRow key={rowIndex}>
+        {Object.values(times).map((timeSlot: any, rowIndex: any) => (
+          <TableRow key={JSON.stringify(timeSlot)}>
             <TableCell
               onMouseEnter={() => handleMouseEnter(null, timeSlot)}
               sx={{
                 minWidth: '200px',
                 borderBottom: 'none',
-                // position: 'relative',
                 width: '200px',
                 position: 'sticky',
                 borderRight: '1px solid rgba(0, 0, 0, 0.1)',
@@ -124,13 +130,12 @@ export function ScheduleTable({
                 ></Box>
               </Grid>
             </TableCell>
-            {rooms.map((_: any, colIndex: any) => {
-              const event = isEvent(colIndex, timeSlot);
+            {rooms.map((room: any, colIndex: any) => {
+              const event = getEventAtPosition(colIndex, timeSlot);
               return (
                 <TableCell
-                  key={colIndex}
+                  key={`${JSON.stringify(timeSlot)}_${room}`}
                   sx={{
-                    // paddingX: '1%',
                     textAlign: 'center',
                     borderLeft: '1px solid rgba(0, 0, 0, 0.1)',
                     borderRight: '1px solid rgba(0, 0, 0, 0.1)',
@@ -142,12 +147,8 @@ export function ScheduleTable({
                   }}
                 >
                   {event &&
-                    rowIndex ===
-                      times.findIndex(
-                        (slot: any) =>
-                          slot.hour === event.start.hour &&
-                          slot.minute === event.start.minute
-                      ) && (
+                    convertToMinutes(timeSlot) ===
+                    convertToMinutes(times[`${event.start.hour} ${event.start.minute}`]) && (
                       <EventDisplay
                         title={event.title}
                         description={event.description}

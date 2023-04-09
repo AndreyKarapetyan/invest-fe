@@ -1,63 +1,27 @@
 import moment from 'moment';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { Box, TableContainer } from '@mui/material';
 import { DatePicker } from './DatePicker';
 import { events } from './mockData';
 import { ScheduleTable } from './ScheduleTable';
 import { SLIDER_WIDTH } from 'src/app/constants';
+import { TimeSlot, convertToMinutes, generateTimeSlots } from './utils';
 
 export function Calendar() {
-  const rooms = [
-    'Room 1',
-    'Room 2',
-    'Room 3',
-    'Room 4',
-    'Room 5',
-    'Room 1',
-    'Room 2',
-    'Room 3',
-    'Room 4',
-    'Room 5',
-    'Room 1',
-    'Room 2',
-    'Room 3',
-    'Room 4',
-    'Room 5',
-    'Room 1',
-    'Room 2',
-    'Room 3',
-    'Room 4',
-    'Room 5',
-    'Room 1',
-    'Room 2',
-    'Room 3',
-    'Room 4',
-    'Room 5',
-    'Room 1',
-    'Room 2',
-    'Room 3',
-    'Room 4',
-    'Room 5',
-  ];
-  const times = generateTimeSlots();
+  const rooms = ['Room 1', 'Room 2', 'Room 3', 'Room 4'];
+  const times = useMemo(generateTimeSlots, []);
   const [isSelecting, setIsSelecting] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState<any>(null);
-  const [selectedStart, setSelectedStart] = useState<any>(null);
-  const [selectedEnd, setSelectedEnd] = useState<any>(null);
-  const [value, setValue] = React.useState<any>(moment());
+  const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
+  const [selectedStart, setSelectedStart] = useState<TimeSlot | null>(null);
+  const [selectedEnd, setSelectedEnd] = useState<TimeSlot | null>(null);
+  const [date, setDate] = React.useState<any>(moment());
 
-  function generateTimeSlots() {
-    const slots = [];
-    for (let i = 9; i <= 22; i++) {
-      for (let j = 0; j < 60; j += 15) {
-        slots.push({ hour: i, minute: j });
-      }
-    }
-    return slots;
-  }
+  const handleDateChange = useCallback((newDate: any) => {
+    setDate(newDate);
+  }, []);
 
-  const handleMouseDown = (roomIndex: any, timeSlot: any) => {
-    const eventAtCurrentPosition = isEvent(roomIndex, timeSlot);
+  const handleMouseDown = useCallback((roomIndex: any, timeSlot: any) => {
+    const eventAtCurrentPosition = getEventAtPosition(roomIndex, timeSlot);
     if (eventAtCurrentPosition) {
       return;
     }
@@ -65,113 +29,94 @@ export function Calendar() {
     setSelectedRoom(roomIndex);
     setSelectedStart(timeSlot);
     setSelectedEnd(timeSlot);
-  };
+  }, []);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsSelecting(false);
-  };
+  }, []);
 
-  const hasEventInSelectionRange = (
-    roomIndex: any,
-    startIndex: number,
-    endIndex: number
-  ) => {
-    for (let i = startIndex; i <= endIndex; i++) {
-      if (isEvent(roomIndex, times[i])) {
-        return true;
+  const handleMouseEnter = useCallback(
+    (_: any, timeSlot: TimeSlot) => {
+      if (isSelecting) {
+        const { hour, minute } = timeSlot;
+        const selectedTime = convertToMinutes(times[`${hour} ${minute}`]);
+        const startTime = convertToMinutes(selectedStart!);
+        const isEventInSelectionRange = events.some(
+          ({ start, end, roomIndex: eventRoomIndex }) =>
+            selectedRoom === eventRoomIndex &&
+            ((Math.min(startTime, selectedTime) <
+              convertToMinutes({ hour: start.hour, minute: start.minute }) &&
+              Math.max(startTime, selectedTime) + 15 >
+                convertToMinutes({
+                  hour: start.hour,
+                  minute: start.minute,
+                })) ||
+              (Math.min(startTime, selectedTime) <
+                convertToMinutes({ hour: end.hour, minute: end.minute }) &&
+                Math.max(startTime, selectedTime) >
+                  convertToMinutes({ hour: end.hour, minute: end.minute })))
+        );
+        if (!isEventInSelectionRange) {
+          setSelectedEnd(timeSlot);
+        }
       }
-    }
-    return false;
-  };
+    },
+    [isSelecting, selectedRoom]
+  );
 
-  const handleMouseEnter = (_: any, timeSlot: any) => {
-    if (isSelecting) {
-      const selectedIndex = times.findIndex(
-        (slot) => slot.hour === timeSlot.hour && slot.minute === timeSlot.minute
-      );
-      const endIndex = times.findIndex(
-        (slot) =>
-          slot.hour === selectedEnd.hour && slot.minute === selectedEnd.minute
-      );
-      if (
-        !hasEventInSelectionRange(
-          selectedRoom,
-          Math.min(selectedIndex, endIndex) + 1,
-          Math.max(selectedIndex, endIndex)
-        )
-      ) {
-        setSelectedEnd(timeSlot);
+  const isSelected = useCallback(
+    (roomIndex: number, timeSlot: TimeSlot) => {
+      if (roomIndex === selectedRoom) {
+        const selectedTime = convertToMinutes(timeSlot);
+        const startTime = convertToMinutes(selectedStart!);
+        const endTime = convertToMinutes(selectedEnd!);
+        return (
+          selectedTime >= Math.min(startTime, endTime) &&
+          selectedTime <= Math.max(startTime, endTime)
+        );
       }
-    }
-  };
+      return false;
+    },
+    [selectedRoom, selectedStart, selectedEnd]
+  );
 
-  const isSelected = (roomIndex: any, timeSlot: any) => {
-    if (roomIndex === selectedRoom) {
-      const selectedIndex = times.findIndex(
-        (slot) => slot.hour === timeSlot.hour && slot.minute === timeSlot.minute
+  const getEventAtPosition = useCallback(
+    (roomIndex: number, timeSlot: TimeSlot) => {
+      const selectedTime = convertToMinutes(timeSlot);
+      return events.find(
+        ({ start, end, roomIndex: eventRoomIndex }) =>
+          eventRoomIndex === roomIndex &&
+          selectedTime >=
+            convertToMinutes({ hour: start.hour, minute: start.minute }) &&
+          selectedTime <=
+            convertToMinutes({ hour: end.hour, minute: end.minute })
       );
-      const startIndex = times.findIndex(
-        (slot) =>
-          slot.hour === selectedStart.hour &&
-          slot.minute === selectedStart.minute
-      );
-      const endIndex = times.findIndex(
-        (slot) =>
-          slot.hour === selectedEnd.hour && slot.minute === selectedEnd.minute
-      );
+    },
+    []
+  );
 
-      return (
-        selectedIndex >= Math.min(startIndex, endIndex) &&
-        selectedIndex <= Math.max(startIndex, endIndex)
-      );
-    }
-    return false;
-  };
-
-  const isEvent = (roomIndex: any, timeSlot: any) => {
-    const event = events.find(
-      (e) =>
-        e.roomIndex === roomIndex &&
-        times.findIndex(
-          (slot) =>
-            slot.hour === timeSlot.hour && slot.minute === timeSlot.minute
-        ) >=
-          times.findIndex(
-            (slot) =>
-              slot.hour === e.start.hour && slot.minute === e.start.minute
-          ) &&
-        times.findIndex(
-          (slot) =>
-            slot.hour === timeSlot.hour && slot.minute === timeSlot.minute
-        ) <=
-          times.findIndex(
-            (slot) => slot.hour === e.end.hour && slot.minute === e.end.minute
-          )
-    );
-
-    return event;
-  };
-
-  const getEventHeight = (
-    start: { hour: number; minute: number },
-    end: { hour: number; minute: number }
-  ) => {
-    const startIndex = times.findIndex(
-      (slot) => slot.hour === start.hour && slot.minute === start.minute
-    );
-    const endIndex = times.findIndex(
-      (slot) => slot.hour === end.hour && slot.minute === end.minute
-    );
-    return (endIndex - startIndex) * 100;
-  };
+  const getEventHeight = useCallback(
+    (
+      start: {
+        hour: number;
+        minute: number;
+      },
+      end: {
+        hour: number;
+        minute: number;
+      }
+    ) => {
+      const startTime = convertToMinutes(start);
+      const endTime = convertToMinutes(end);
+      return ((endTime - startTime) * 100) / 15;
+    },
+    []
+  );
 
   return (
     <Fragment>
       <Box sx={{ marginTop: 7, position: 'fixed' }}>
-        <DatePicker
-          value={value}
-          onChange={(newValue: any) => setValue(newValue)}
-        />
+        <DatePicker value={date} onChange={handleDateChange} />
       </Box>
       <TableContainer
         sx={{
@@ -182,16 +127,16 @@ export function Calendar() {
           marginLeft: '350px',
         }}
       >
-          <ScheduleTable
-            rooms={rooms}
-            times={times}
-            handleMouseEnter={handleMouseEnter}
-            isEvent={isEvent}
-            isSelected={isSelected}
-            getEventHeight={getEventHeight}
-            handleMouseDown={handleMouseDown}
-            handleMouseUp={handleMouseUp}
-          />
+        <ScheduleTable
+          rooms={rooms}
+          times={times}
+          handleMouseEnter={handleMouseEnter}
+          getEventAtPosition={getEventAtPosition}
+          isSelected={isSelected}
+          getEventHeight={getEventHeight}
+          handleMouseDown={handleMouseDown}
+          handleMouseUp={handleMouseUp}
+        />
       </TableContainer>
     </Fragment>
   );

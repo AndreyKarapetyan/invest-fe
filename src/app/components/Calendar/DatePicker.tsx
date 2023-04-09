@@ -1,15 +1,16 @@
 import { LocalizationProvider, StaticDatePicker } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { memo } from 'react';
 
-export function DatePicker({ value, onChange }: any) {
+export const DatePicker = memo(function DatePicker({ date, onChange }: any) {
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
       <StaticDatePicker
         displayStaticWrapperAs="desktop"
         openTo="day"
-        value={value}
+        value={date}
         onChange={onChange}
       />
     </LocalizationProvider>
   );
-}
+});
