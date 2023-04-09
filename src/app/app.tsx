@@ -1,11 +1,11 @@
 import Login from './screens/Login';
-import { WithBranches } from './components/admin/WithBranches';
+import { AdminCalendar } from './screens/admin/AdminCalendar';
 import { AdminStudents } from './screens/admin/AdminStudents';
+import { AdminTeacher } from './screens/admin/AdminTeacher';
 import { AdminTeachers } from './screens/admin/AdminTeachers';
 import { Route, Routes } from 'react-router-dom';
-import { AdminTeacher } from './screens/admin/AdminTeacher';
+import { WithBranches } from './components/admin/WithBranches';
 import { WithSlider } from './components/admin/WithSlider';
-import { Calendar } from './screens/Calendar';
 
 export function App() {
   return (
@@ -44,7 +44,7 @@ export function App() {
         element={
           <WithSlider>
             <WithBranches>
-              <Calendar />
+              <AdminCalendar />
             </WithBranches>
           </WithSlider>
         }
