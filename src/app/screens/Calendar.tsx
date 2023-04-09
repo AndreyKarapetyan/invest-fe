@@ -63,7 +63,7 @@ const EventSelection = ({
 );
 
 export const Calendar = () => {
-  const timeSlotHeight = 20;
+  const timeSlotHeight = 0;
   const rooms = ['Room 1', 'Room 2', 'Room 3', 'Room 4'];
   const times = generateTimeSlots();
 
@@ -221,7 +221,8 @@ export const Calendar = () => {
 
   return (
     <Grid container justifyContent="center">
-      <TableContainer sx={{ width: '60vw', outline: '1px dashed red' }}>
+      
+      <TableContainer sx={{ width: '60vw', marginTop: 3, outline: '1px dashed red' }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -250,6 +251,9 @@ export const Calendar = () => {
                   onMouseEnter={() => handleMouseEnter(null, timeSlot)}
                   sx={{
                     borderBottom: 'none',
+                    position: 'relative',
+                    width: '200px',
+                    // outline: '1px dashed red'
                   }}
                 >
                   <Grid
@@ -257,11 +261,13 @@ export const Calendar = () => {
                     flexWrap="nowrap"
                     justifyContent="flex-end"
                     alignItems="baseline"
-                    sx={{
-                      transform: 'translateY(-130%)',
-                    }}
                   >
-                    <Box>
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        bottom: '22px',
+                        right: rowIndex % 4 === 0 ? '90px' : '45px'
+                      }}>
                       {rowIndex % 4 === 0 &&
                         `${timeSlot.hour < 10 ? '0' : ''}${timeSlot.hour}:00`}
                       {rowIndex % 4 === 1 &&
@@ -273,11 +279,11 @@ export const Calendar = () => {
                     </Box>
                     <Box
                       sx={{
-                        position: 'relative',
-                        bottom: '5px',
-                        left: '16px',
+                        position: 'absolute',
+                        bottom: '33px',
+                        left: rowIndex % 4 === 0 ? '120px' : '165px',
                         backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                        width: rowIndex % 4 === 0 ? '100px' : '20px',
+                        width: rowIndex % 4 === 0 ? '90px' : '45px',
                         height: '1px',
                       }}
                     ></Box>
