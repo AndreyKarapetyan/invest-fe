@@ -56,7 +56,8 @@ export function AdminStudents() {
     studentDeleteLoading,
   } = useDeleteStudent();
   const loadingTimeOut = useRef<any>();
-  const currentBranch = useContext(BranchContext);
+  const branchDetails = useContext<any>(BranchContext);
+  const currentBranch = branchDetails?.name;
 
   const loadMore = useCallback(() => {
     getStudents(currentBranch);

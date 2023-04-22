@@ -1,27 +1,36 @@
-import moment from 'moment';
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { Box, TableContainer } from '@mui/material';
+import { convertToMinutes, generateTimeSlots, TimeSlot } from './utils';
 import { DatePicker } from './DatePicker';
 import { events } from './mockData';
+import {
+  Fragment,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { ScheduleTable } from './ScheduleTable';
 import { SLIDER_WIDTH } from 'src/app/constants';
-import { TimeSlot, convertToMinutes, generateTimeSlots } from './utils';
 
-export function Calendar() {
-  const rooms = ['Room 1', 'Room 2', 'Room 3', 'Room 4'];
+export const Calendar = memo(function Calendar({
+  rooms,
+  /* events, */ date,
+  handleDateChange,
+  handleDialogOpen,
+  shouldUpdateSubmissionData,
+  updateSubmissionData,
+  checkSubmissionStatus,
+}: any) {
   const times = useMemo(generateTimeSlots, []);
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
   const [selectedStart, setSelectedStart] = useState<TimeSlot | null>(null);
   const [selectedEnd, setSelectedEnd] = useState<TimeSlot | null>(null);
-  const [date, setDate] = React.useState<any>(moment());
-
-  const handleDateChange = useCallback((newDate: any) => {
-    setDate(newDate);
-  }, []);
 
   const handleMouseDown = useCallback((roomIndex: any, timeSlot: any) => {
     const eventAtCurrentPosition = getEventAtPosition(roomIndex, timeSlot);
+    console.log(roomIndex, timeSlot);
     if (eventAtCurrentPosition) {
       return;
     }
@@ -33,6 +42,7 @@ export function Calendar() {
 
   const handleMouseUp = useCallback(() => {
     setIsSelecting(false);
+    handleDialogOpen();
   }, []);
 
   const handleMouseEnter = useCallback(
@@ -42,7 +52,7 @@ export function Calendar() {
         const selectedTime = convertToMinutes(times[`${hour} ${minute}`]);
         const startTime = convertToMinutes(selectedStart!);
         const isEventInSelectionRange = events.some(
-          ({ start, end, roomIndex: eventRoomIndex }) =>
+          ({ start, end, roomIndex: eventRoomIndex }: any) =>
             selectedRoom === eventRoomIndex &&
             ((Math.min(startTime, selectedTime) <
               convertToMinutes({ hour: start.hour, minute: start.minute }) &&
@@ -84,11 +94,11 @@ export function Calendar() {
     (roomIndex: number, timeSlot: TimeSlot) => {
       const selectedTime = convertToMinutes(timeSlot);
       return events.find(
-        ({ start, end, roomIndex: eventRoomIndex }) =>
+        ({ start, end, roomIndex: eventRoomIndex }: any) =>
           eventRoomIndex === roomIndex &&
           selectedTime >=
             convertToMinutes({ hour: start.hour, minute: start.minute }) &&
-          selectedTime <=
+          selectedTime <
             convertToMinutes({ hour: end.hour, minute: end.minute })
       );
     },
@@ -113,6 +123,19 @@ export function Calendar() {
     []
   );
 
+  useEffect(() => {
+    if (shouldUpdateSubmissionData.slots) {
+      updateSubmissionData({
+        startHour: selectedStart?.hour,
+        startMinute: selectedStart?.minute,
+        endHour: selectedEnd?.hour,
+        endMinute: selectedEnd?.minute,
+        roomId: selectedRoom && rooms[selectedRoom as number].id,
+      });
+      checkSubmissionStatus('slots', false);
+    }
+  }, [shouldUpdateSubmissionData]);
+
   return (
     <Fragment>
       <Box sx={{ marginTop: 7, position: 'fixed' }}>
@@ -136,8 +159,9 @@ export function Calendar() {
           getEventHeight={getEventHeight}
           handleMouseDown={handleMouseDown}
           handleMouseUp={handleMouseUp}
+          handleEventClick={handleDialogOpen}
         />
       </TableContainer>
     </Fragment>
   );
-}
+});

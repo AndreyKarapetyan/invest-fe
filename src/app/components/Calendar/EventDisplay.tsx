@@ -1,8 +1,14 @@
-import { Box } from "@mui/material";
+import { Box, ButtonBase } from '@mui/material';
 
-export function EventDisplay({ title, description, height }: any) {
+export function EventDisplay({
+  title,
+  description,
+  height,
+  handleEventClick,
+}: any) {
   return (
-    <Box
+    <ButtonBase
+      onClick={handleEventClick}
       sx={{
         backgroundColor: 'rgba(255, 0, 0, 0.3)',
         height: `calc(${height}%)`,
@@ -14,6 +20,7 @@ export function EventDisplay({ title, description, height }: any) {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
+        zIndex: 1,
       }}
     >
       <Box
@@ -26,6 +33,6 @@ export function EventDisplay({ title, description, height }: any) {
         {title}
       </Box>
       <Box sx={{ fontSize: '10px', textAlign: 'center' }}>{description}</Box>
-    </Box>
+    </ButtonBase>
   );
 }

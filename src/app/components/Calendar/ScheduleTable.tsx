@@ -11,11 +11,11 @@ import { EventDisplay } from './EventDisplay';
 import { EventSelection } from './EventSelection';
 import { TimeSlot, convertToMinutes } from './utils';
 
-interface ScheduleTableProps {
-  rooms: string[];
-  times: { [index: string]: TimeSlot };
-  handleMouseEnter: (_: any, timeSlot: TimeSlot) => void;
-}
+// interface ScheduleTableProps {
+//   rooms: string[];
+//   times: { [index: string]: TimeSlot };
+//   handleMouseEnter: (_: any, timeSlot: TimeSlot) => void;
+// }
 
 export function ScheduleTable({
   rooms,
@@ -26,6 +26,7 @@ export function ScheduleTable({
   getEventHeight,
   handleMouseDown,
   handleMouseUp,
+  handleEventClick,
 }: any) {
   return (
     <Table stickyHeader>
@@ -39,20 +40,21 @@ export function ScheduleTable({
               borderRight: '1px solid rgba(0, 0, 0, 0.1)',
               backgroundColor: 'white',
               left: 0,
-              zIndex: 10,
+              zIndex: 4,
             }}
           ></TableCell>
           {rooms.map((room: any) => (
             <TableCell
-              key={room}
+              key={room.id}
               sx={{
                 minWidth: '200px',
                 textAlign: 'center',
                 borderLeft: '1px solid rgba(0, 0, 0, 0.1)',
                 borderRight: '1px solid rgba(0, 0, 0, 0.1)',
+                zIndex: 3,
               }}
             >
-              {room}
+              {room.name}
             </TableCell>
           ))}
         </TableRow>
@@ -66,12 +68,11 @@ export function ScheduleTable({
               borderRight: '1px solid rgba(0, 0, 0, 0.1)',
               backgroundColor: 'white',
               left: 0,
-              zIndex: 1,
             }}
           ></TableCell>
           {rooms.map((room: any, index: any) => (
             <TableCell
-              key={`_${room}`}
+              key={`_${room.id}`}
               sx={{
                 minWidth: '200px',
                 borderLeft: '1px solid rgba(0, 0, 0, 0.1)',
@@ -92,7 +93,7 @@ export function ScheduleTable({
                 borderRight: '1px solid rgba(0, 0, 0, 0.1)',
                 backgroundColor: 'white',
                 left: 0,
-                zIndex: 1,
+                zIndex: 2,
               }}
             >
               <Grid
@@ -134,7 +135,7 @@ export function ScheduleTable({
               const event = getEventAtPosition(colIndex, timeSlot);
               return (
                 <TableCell
-                  key={`${JSON.stringify(timeSlot)}_${room}`}
+                  key={`${JSON.stringify(timeSlot)}_${room.id}`}
                   sx={{
                     textAlign: 'center',
                     borderLeft: '1px solid rgba(0, 0, 0, 0.1)',
@@ -153,6 +154,7 @@ export function ScheduleTable({
                         title={event.title}
                         description={event.description}
                         height={getEventHeight(event.start, event.end)}
+                        handleEventClick={handleEventClick}
                       />
                     )}
                   <EventSelection

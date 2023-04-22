@@ -28,7 +28,8 @@ export function AdminTeachers() {
     deleteTeacher,
   } = useDeleteTeacher();
   const loadingTimeOut = useRef<any>();
-  const currentBranch = useContext(BranchContext);
+  const branchDetails = useContext<any>(BranchContext);
+  const currentBranch = branchDetails?.name;
   const navigate = useNavigate();
 
   const handleDeleteOpen = (teacherId: number) => {

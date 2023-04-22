@@ -6,12 +6,13 @@ import { useGetBranches } from 'src/app/hooks/useGetBranches';
 export const BranchContext = createContext(null);
 
 export function WithBranches(props: any) {
-  const [currentBranch, setCurrentBranch] = useState(null);
+  const [currentBranch, setCurrentBranch] = useState<any>(null);
   const [isLoadingShowing, setIsLoadingShowing] = useState(false);
   const { branches, branchesLoading, getBranches } = useGetBranches();
   const loadingTimeOut = useRef<any>();
 
-  const handleBranchChange = (_event: any, branch: any) => {
+  const handleBranchChange = (_event: any, branchName: any) => {
+    const branch = branches.find((branch) => branch.name === branchName)
     setCurrentBranch(branch);
   };
 
@@ -21,7 +22,7 @@ export function WithBranches(props: any) {
 
   useEffect(() => {
     if (branches.length && !currentBranch) {
-      setCurrentBranch(branches[0].name);
+      setCurrentBranch(branches[0]);
     }
   }, [branches, currentBranch]);
 
@@ -47,7 +48,7 @@ export function WithBranches(props: any) {
         {currentBranch && (
           <Tabs
             sx={{ display: 'flex', justifyContent: 'center' }}
-            value={currentBranch}
+            value={currentBranch.name}
             onChange={handleBranchChange}
             textColor="secondary"
             indicatorColor="secondary"
