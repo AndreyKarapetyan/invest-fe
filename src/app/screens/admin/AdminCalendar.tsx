@@ -3,8 +3,9 @@ import { BranchContext } from 'src/app/components/admin/WithBranches';
 import { Calendar } from 'src/app/components/Calendar/Calendar';
 import { EventDialog } from 'src/app/components/Calendar/EventDialog';
 import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
-import { useGetEvents } from './hooks/events';
+import { useCreateEvent, useGetEvents } from './hooks/events';
 import { useGetTeacherGroups, useGetTeachers } from './hooks/teacher';
+import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 
 export function AdminCalendar() {
   const currentBranch = useContext(BranchContext) as any;
@@ -16,10 +17,17 @@ export function AdminCalendar() {
     slots: false,
   });
   const [event, setEvent] = useState<any>({});
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { events, eventsLoading, eventsError, getEvents } = useGetEvents();
   const { teachers, teachersLoading, getTeachers } = useGetTeachers();
   const { groups, groupsLoading, getTeacherGroups } = useGetTeacherGroups();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const {
+    isEventCreated,
+    studentCreationLoading,
+    createEvent,
+    resetEventCreationSuccess,
+    studentCreationError,
+  } = useCreateEvent();
 
   const handleDialogClose = useCallback(() => {
     setDialogOpen(false);
@@ -88,10 +96,21 @@ export function AdminCalendar() {
       !shouldUpdateSubmissionData.ids &&
       !shouldUpdateSubmissionData.slots
     ) {
-      console.log('Submitting event ', event);
+      createEvent(event);
       checkSubmissionStatus('startedUpdates', false);
     }
   }, [shouldUpdateSubmissionData]);
+
+  useEffect(() => {
+    if (isEventCreated /* ,  */) {
+      getEvents(currentBranch.name, date.format());
+      setTimeout(() => {
+        resetEventCreationSuccess();
+        // resetStudentUpdateSuccess();
+      }, 2000);
+      setTimeout(() => handleDialogClose(), 500);
+    }
+  }, [isEventCreated/* , isStudentUpdated */]);
 
   return (
     currentBranch && (
@@ -109,7 +128,6 @@ export function AdminCalendar() {
         />
         {dialogOpen && (
           <EventDialog
-            // handleSubmit={() => {}}
             isOpen={dialogOpen}
             handleClose={handleDialogClose}
             getTeacherGroups={getTeacherGroups}
@@ -122,6 +140,12 @@ export function AdminCalendar() {
             checkSubmissionStatus={checkSubmissionStatus}
           />
         )}
+        {(isEventCreated/*  || isStudentUpdated || isStudentDeleted */) && (
+        <TopCenterSnackbar
+          message="Success"
+          open={isEventCreated/*  || isStudentUpdated || isStudentDeleted */}
+        />
+      )}
       </Fragment>
     )
   );

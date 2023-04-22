@@ -112,7 +112,7 @@ export function EventDialog({
   useEffect(() => {
     if (shouldUpdateSubmissionData.ids) {
       updateSubmissionData(eventData);
-      checkSubmissionStatus('ids', false)
+      checkSubmissionStatus('ids', false);
     }
   }, [shouldUpdateSubmissionData]);
 
@@ -223,10 +223,10 @@ export function EventDialog({
               <MenuItem value={optionOnce.value}>{optionOnce.name}</MenuItem>
               {weekDays.map(({ name, value }) => (
                 <MenuItem
-                  disabled={
+                  disabled={Boolean(
                     eventData.pattern &&
-                    eventData.pattern.includes(optionOnce.value)
-                  }
+                      eventData.pattern.includes(optionOnce.value)
+                  )}
                   key={name}
                   value={value}
                 >
@@ -238,7 +238,9 @@ export function EventDialog({
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button autoFocus onClick={handleSubmitStart}>Save Changes</Button>
+        <Button autoFocus onClick={handleSubmitStart}>
+          Save Changes
+        </Button>
       </DialogActions>
     </StyledDialog>
   );

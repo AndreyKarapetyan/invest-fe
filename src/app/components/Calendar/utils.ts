@@ -15,4 +15,10 @@ export const generateTimeSlots = () => {
   return slots;
 };
 
-export const convertToMinutes = ({ hour, minute }: TimeSlot) => hour * 60 + minute;
+export const getNextTimeSlot = (timeSlot: TimeSlot): TimeSlot => ({
+  hour: timeSlot.hour + Math.floor((timeSlot.minute + 15) / 60),
+  minute: (timeSlot.minute + 15) % 60,
+});
+
+export const convertToMinutes = ({ hour, minute }: TimeSlot) =>
+  hour * 60 + minute;

@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { EventDisplay } from './EventDisplay';
 import { EventSelection } from './EventSelection';
-import { TimeSlot, convertToMinutes } from './utils';
+import { TimeSlot, convertToMinutes, getNextTimeSlot } from './utils';
 
 // interface ScheduleTableProps {
 //   rooms: string[];
@@ -84,7 +84,9 @@ export function ScheduleTable({
         {Object.values(times).map((timeSlot: any, rowIndex: any) => (
           <TableRow key={JSON.stringify(timeSlot)}>
             <TableCell
-              onMouseEnter={() => handleMouseEnter(null, timeSlot)}
+              onMouseEnter={() =>
+                handleMouseEnter(null, getNextTimeSlot(timeSlot))
+              }
               sx={{
                 minWidth: '200px',
                 borderBottom: 'none',
@@ -131,8 +133,8 @@ export function ScheduleTable({
                 ></Box>
               </Grid>
             </TableCell>
-            {rooms.map((room: any, colIndex: any) => {
-              const event = getEventAtPosition(colIndex, timeSlot);
+            {rooms.map((room: any) => {
+              const event = getEventAtPosition(room.id, timeSlot);
               return (
                 <TableCell
                   key={`${JSON.stringify(timeSlot)}_${room.id}`}
@@ -141,7 +143,7 @@ export function ScheduleTable({
                     borderLeft: '1px solid rgba(0, 0, 0, 0.1)',
                     borderRight: '1px solid rgba(0, 0, 0, 0.1)',
                     backgroundColor:
-                      isSelected(colIndex, timeSlot) && !event
+                      isSelected(room.id, timeSlot) && !event
                         ? 'rgba(0, 0, 255, 0.1)'
                         : 'inherit',
                     position: 'relative',
@@ -149,21 +151,23 @@ export function ScheduleTable({
                 >
                   {event &&
                     convertToMinutes(timeSlot) ===
-                    convertToMinutes(times[`${event.start.hour} ${event.start.minute}`]) && (
+                      convertToMinutes(
+                        times[`${event.start.hour} ${event.start.minute}`]
+                      ) && (
                       <EventDisplay
-                        title={event.title}
-                        description={event.description}
+                        teacherFullName={event.teacherFullName}
+                        groupName={event.groupName}
                         height={getEventHeight(event.start, event.end)}
                         handleEventClick={handleEventClick}
                       />
                     )}
                   <EventSelection
-                    roomIndex={colIndex}
+                    roomId={room.id}
                     timeSlot={timeSlot}
                     handleMouseDown={handleMouseDown}
                     handleMouseUp={handleMouseUp}
                     handleMouseEnter={handleMouseEnter}
-                    isSelected={isSelected(colIndex, timeSlot)}
+                    isSelected={isSelected(room.id, timeSlot)}
                   />
                 </TableCell>
               );

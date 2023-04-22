@@ -1,7 +1,8 @@
 import { Box } from '@mui/material';
+import { getNextTimeSlot } from './utils';
 
 export function EventSelection({
-  roomIndex,
+  roomId,
   timeSlot,
   handleMouseDown,
   handleMouseUp,
@@ -18,9 +19,9 @@ export function EventSelection({
         bottom: 0,
         backgroundColor: isSelected ? 'rgba(0, 0, 255, 0.1)' : 'transparent',
       }}
-      onMouseDown={() => handleMouseDown(roomIndex, timeSlot)}
+      onMouseDown={() => handleMouseDown(roomId, timeSlot)}
       onMouseUp={handleMouseUp}
-      onMouseEnter={() => handleMouseEnter(roomIndex, timeSlot)}
+      onMouseEnter={() => handleMouseEnter(roomId, getNextTimeSlot(timeSlot))}
     />
   );
 }

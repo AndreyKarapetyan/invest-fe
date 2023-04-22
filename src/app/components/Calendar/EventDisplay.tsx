@@ -1,8 +1,8 @@
 import { Box, ButtonBase } from '@mui/material';
 
 export function EventDisplay({
-  title,
-  description,
+  teacherFullName,
+  groupName,
   height,
   handleEventClick,
 }: any) {
@@ -30,9 +30,9 @@ export function EventDisplay({
           marginBottom: '2px',
         }}
       >
-        {title}
+        {teacherFullName}
       </Box>
-      <Box sx={{ fontSize: '10px', textAlign: 'center' }}>{description}</Box>
+      <Box sx={{ fontSize: '10px', textAlign: 'center' }}>{groupName}</Box>
     </ButtonBase>
   );
 }

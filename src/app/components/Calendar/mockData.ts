@@ -1,20 +1,30 @@
 export const events = [
   {
-    roomIndex: 0,
-    title: 'Meeting A',
-    description: 'Important Meeting',
-    start: { hour: 9, minute: 30 },
-    end: { hour: 10, minute: 30 },
+    id: 1,
+    start: {
+      hour: 11,
+      minute: 0,
+    },
+    end: {
+      hour: 11,
+      minute: 45,
+    },
+    pattern: '2,4,6',
+    groupId: 'clgqylh8t0002eidrw0a3o4pt',
+    groupName: 'Primary Group of Teacher 2',
+    teacherId: 2,
+    roomId: 36,
+    teacherFullName: 'Teacher 2 Abovyan',
   },
   {
-    roomIndex: 2,
+    roomId: 37,
     title: 'Workshop B',
     description: 'Skill Development',
     start: { hour: 14, minute: 0 },
     end: { hour: 15, minute: 45 },
   },
   {
-    roomIndex: 3,
+    roomId: 38,
     title: 'Presentation C',
     description: 'Product Launch',
     start: { hour: 17, minute: 30 },
