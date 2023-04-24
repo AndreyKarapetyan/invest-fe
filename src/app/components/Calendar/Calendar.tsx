@@ -42,7 +42,6 @@ export const Calendar = memo(function Calendar({
 
   const handleMouseUp = useCallback(() => {
     if (isSelecting) {
-      console.log(1321513413511352);
       setIsSelecting(false);
       handleDialogOpen();
     }
@@ -167,6 +166,7 @@ export const Calendar = memo(function Calendar({
           handleEventClick={handleDialogOpen}
         />
       </TableContainer>
+      
     </Fragment>
   );
 });

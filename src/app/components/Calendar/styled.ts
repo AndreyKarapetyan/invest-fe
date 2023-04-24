@@ -3,6 +3,7 @@ import {
   Dialog,
   FormControl,
   FormControlLabel,
+  Grid,
   styled,
   TextField,
 } from '@mui/material';
@@ -36,3 +37,4 @@ export const StyledCheckBoxFormControl = styled(FormControlLabel)(() => ({
     minHeight: '60px',
   },
 }));
+export const StyledFormGrid = styled(Grid)(() => formFieldStyles)

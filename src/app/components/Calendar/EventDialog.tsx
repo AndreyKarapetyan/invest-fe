@@ -24,6 +24,7 @@ import {
   StyledFormControl,
 } from './styled';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { TimePicker } from './TimePicker';
 
 const optionOnce = { value: 'once', name: "Don't repeat" };
 const weekDays = [
@@ -149,6 +150,7 @@ export function EventDialog({
       </DialogTitle>
       <DialogContent>
         <Grid container direction="column" marginTop={1}>
+          <TimePicker/>
           <StyledAutoComplete
             onOpen={handleTeacherOpen}
             onClose={handleTeacherClose}
