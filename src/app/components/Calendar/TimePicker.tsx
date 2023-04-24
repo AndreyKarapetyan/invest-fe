@@ -1,43 +1,56 @@
 import {
   Box,
   FormControl,
-  Grid,
   InputLabel,
   MenuItem,
   MenuProps,
   Select,
-  styled,
 } from '@mui/material';
-import { useMemo } from 'react';
-import { generateTimeSlots } from './utils';
 import { StyledFormGrid } from './styled';
+import { convertToMinutes } from './utils';
 
 const menuProps: Partial<MenuProps> = {
   anchorOrigin: {
-    vertical: "bottom",
-    horizontal: "left",
+    vertical: 'bottom',
+    horizontal: 'left',
   },
   transformOrigin: {
-    vertical: "top",
-    horizontal: "left",
+    vertical: 'top',
+    horizontal: 'left',
   },
   // getContentAnchorEl: null,
   PaperProps: {
     style: {
-      maxHeight: "50vh", // Adjust this value to control the dropdown's max height
+      maxHeight: '50vh', // Adjust this value to control the dropdown's max height
     },
   },
 };
 
-export function TimePicker() {
-  const times = useMemo(generateTimeSlots, []);
+export function TimePicker({
+  times,
+  startTime,
+  endTime,
+  handleStartChange,
+  handleEndChange,
+}: any) {
   return (
     <StyledFormGrid container alignItems="baseline">
       <FormControl sx={{ width: '25%' }}>
         <InputLabel id="time-picker-start">Start</InputLabel>
-        <Select labelId="time-picker-start" label="start" MenuProps={menuProps}>
-          {Object.entries(times).map(([key, timeSlot], rowIndex) => (
-            <MenuItem key={`TimePickerStart_${key}`} value={key}>
+        <Select
+          labelId="time-picker-start"
+          label="start"
+          MenuProps={menuProps}
+          value={startTime ? JSON.stringify(startTime) : ''}
+          onChange={({ target: { value } }) =>
+            handleStartChange(JSON.parse(value))
+          }
+        >
+          {Object.entries(times).map(([key, timeSlot]: any, rowIndex) => (
+            <MenuItem
+              key={`TimePickerStart_${key}`}
+              value={JSON.stringify(timeSlot)}
+            >
               {rowIndex % 4 === 0 &&
                 `${timeSlot.hour < 10 ? '0' : ''}${timeSlot.hour}:00`}
               {rowIndex % 4 === 1 &&
@@ -60,9 +73,21 @@ export function TimePicker() {
       />
       <FormControl sx={{ width: '25%' }}>
         <InputLabel id="time-picker-end">End</InputLabel>
-        <Select labelId="time-picker-end" label="End" MenuProps={menuProps}>
-          {Object.entries(times).map(([key, timeSlot], rowIndex) => (
-            <MenuItem key={`TimePickerStart_${key}`} value={key}>
+        <Select
+          labelId="time-picker-end"
+          label="End"
+          MenuProps={menuProps}
+          value={endTime ? JSON.stringify(endTime) : ''}
+          onChange={({ target: { value } }) =>
+            handleEndChange(JSON.parse(value))
+          }
+        >
+          {Object.entries(times).map(([key, timeSlot]: any, rowIndex) => (
+            <MenuItem
+              disabled={convertToMinutes(timeSlot) < convertToMinutes(startTime)}
+              key={`TimePickerStart_${key}`}
+              value={JSON.stringify(timeSlot)}
+            >
               {rowIndex % 4 === 0 &&
                 `${timeSlot.hour < 10 ? '0' : ''}${timeSlot.hour}:00`}
               {rowIndex % 4 === 1 &&

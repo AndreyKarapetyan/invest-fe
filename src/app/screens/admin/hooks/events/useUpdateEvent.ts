@@ -1,16 +1,16 @@
 import { useCallback, useState } from 'react';
 import { Api } from 'src/app/utils/Api';
 
-export function useCreateEvent() {
+export function useUpdateEvent() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const createEvent = useCallback((data: any) => {
+  const updateEvent = useCallback((data: any) => {
     (async function () {
       try {
         setLoading(true);
-        await Api.post(`/lessons`, data);
+        await Api.put(`/lessons`, data);
         setIsSuccess(true);
       } catch (err: any) {
         setError(err);
@@ -20,15 +20,15 @@ export function useCreateEvent() {
     })();
   }, []);
 
-  const resetEventCreationSuccess = () => {
+  const resetEventUpdateSuccess = () => {
     setIsSuccess(false);
   }
 
   return {
-    eventCreationError: error,
-    eventCreationLoading: loading,
-    isEventCreated: isSuccess,
-    resetEventCreationSuccess,
-    createEvent,
+    eventUpdateError: error,
+    eventUpdateLoading: loading,
+    isEventUpdated: isSuccess,
+    resetEventUpdateSuccess,
+    updateEvent,
   };
 }

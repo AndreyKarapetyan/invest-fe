@@ -20,5 +20,10 @@ export const getNextTimeSlot = (timeSlot: TimeSlot): TimeSlot => ({
   minute: (timeSlot.minute + 15) % 60,
 });
 
+export const getPrevTimeSlot = (timeSlot: TimeSlot): TimeSlot => ({
+  hour: timeSlot.hour - (timeSlot.minute - 15 < 0 ? 1 : 0),
+  minute: timeSlot.minute - 15 < 0 ? 45 : timeSlot.minute - 15,
+});
+
 export const convertToMinutes = ({ hour, minute }: TimeSlot) =>
   hour * 60 + minute;

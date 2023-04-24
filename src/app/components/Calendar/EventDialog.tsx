@@ -51,6 +51,11 @@ export function EventDialog({
   handleSubmitStart,
   checkSubmissionStatus,
   handleDeleteOpen,
+  times,
+  startTime,
+  endTime,
+  handleStartChange,
+  handleEndChange,
 }: any) {
   const [eventData, setEventData] = useState(
     event || {
@@ -150,7 +155,13 @@ export function EventDialog({
       </DialogTitle>
       <DialogContent>
         <Grid container direction="column" marginTop={1}>
-          <TimePicker/>
+          <TimePicker
+            times={times}
+            startTime={startTime}
+            endTime={endTime}
+            handleStartChange={handleStartChange}
+            handleEndChange={handleEndChange}
+          />
           <StyledAutoComplete
             onOpen={handleTeacherOpen}
             onClose={handleTeacherClose}

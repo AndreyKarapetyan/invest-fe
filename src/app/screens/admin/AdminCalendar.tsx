@@ -1,23 +1,26 @@
 import moment from 'moment';
 import { BranchContext } from 'src/app/components/admin/WithBranches';
 import { Calendar } from 'src/app/components/Calendar/Calendar';
-import { EventDialog } from 'src/app/components/Calendar/EventDialog';
 import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
-import { useCreateEvent, useDeleteEvent, useGetEvents } from './hooks/events';
+import {
+  useCreateEvent,
+  useDeleteEvent,
+  useGetEvents,
+  useUpdateEvent,
+} from './hooks/events';
 import { useGetTeacherGroups, useGetTeachers } from './hooks/teacher';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
-import { ConfirmationDialog } from 'src/app/components/Confirmation';
-import { ChangeModeDialog } from 'src/app/components/Calendar/ChangeModeDialog';
 import { ChangeMode } from 'src/app/types/changeMode';
 
 export function AdminCalendar() {
   const currentBranch = useContext(BranchContext) as any;
   const [date, setDate] = useState(moment());
   const [shouldUpdateSubmissionData, setShouldUpdateSubmissionData] = useState({
-    startedUpdates: false,
+    startedSubmitProcess: false,
     date: false,
     ids: false,
     slots: false,
+    changeModeConfirmed: false,
   });
   const [event, setEvent] = useState<any>({});
   const [deletableEvent, setDeletableEvent] = useState<any>(null);
@@ -27,11 +30,18 @@ export function AdminCalendar() {
   const { groups, groupsLoading, getTeacherGroups } = useGetTeacherGroups();
   const {
     isEventCreated,
-    studentCreationLoading,
+    eventCreationError,
+    eventCreationLoading,
     createEvent,
     resetEventCreationSuccess,
-    studentCreationError,
   } = useCreateEvent();
+  const {
+    isEventUpdated,
+    updateEvent,
+    eventUpdateError,
+    eventUpdateLoading,
+    resetEventUpdateSuccess,
+  } = useUpdateEvent();
   const {
     isEventDeleted,
     deleteEvent,
@@ -48,14 +58,19 @@ export function AdminCalendar() {
   const handleDialogOpen = useCallback(
     (eventData?: any) => {
       if (eventData) {
-        setEvent(eventData);
+        setEvent({
+          ...eventData,
+          changeMode:
+            event.pattern === 'once' ? ChangeMode.ALL : ChangeMode.ONCE,
+          date: date.format(),
+        });
         if (eventData.teacherId) {
           getTeacherGroups(eventData.teacherId);
         }
       }
       setDialogOpen(true);
     },
-    [currentBranch, /* getTeacherGroups, */ getTeachers]
+    [getTeacherGroups]
   );
 
   const handleDateChange = useCallback((newDate: any) => {
@@ -64,10 +79,21 @@ export function AdminCalendar() {
 
   const handleSubmitStart = () => {
     setShouldUpdateSubmissionData({
-      startedUpdates: true,
+      startedSubmitProcess: true,
       date: true,
       ids: true,
       slots: true,
+      changeModeConfirmed: false,
+    });
+  };
+
+  const cancelSubmit = () => {
+    setShouldUpdateSubmissionData({
+      startedSubmitProcess: false,
+      date: false,
+      ids: false,
+      slots: false,
+      changeModeConfirmed: false,
     });
   };
 
@@ -119,7 +145,7 @@ export function AdminCalendar() {
     if (dialogOpen) {
       getTeachers(currentBranch.name);
     }
-  }, [dialogOpen]);
+  }, [dialogOpen, currentBranch]);
 
   useEffect(() => {
     if (currentBranch) {
@@ -128,27 +154,36 @@ export function AdminCalendar() {
   }, [currentBranch, date]);
 
   useEffect(() => {
+    console.log(shouldUpdateSubmissionData)
     if (
-      shouldUpdateSubmissionData.startedUpdates &&
+      shouldUpdateSubmissionData.startedSubmitProcess &&
       !shouldUpdateSubmissionData.date &&
       !shouldUpdateSubmissionData.ids &&
       !shouldUpdateSubmissionData.slots
     ) {
-      createEvent(event);
-      checkSubmissionStatus('startedUpdates', false);
+      if (
+        event.id &&
+        shouldUpdateSubmissionData.changeModeConfirmed
+      ) {
+        updateEvent(event);
+        checkSubmissionStatus('startedSubmitProcess', false);
+      } else if (!event.id) {
+        createEvent(event);
+        checkSubmissionStatus('startedSubmitProcess', false);
+      }
     }
   }, [shouldUpdateSubmissionData]);
 
   useEffect(() => {
-    if (isEventCreated /* ,  */) {
+    if (isEventCreated || isEventUpdated) {
       getEvents(currentBranch.name, date.format());
       setTimeout(() => {
         resetEventCreationSuccess();
-        // resetStudentUpdateSuccess();
+        resetEventUpdateSuccess();
       }, 2000);
       setTimeout(() => handleDialogClose(), 500);
     }
-  }, [isEventCreated /* , isStudentUpdated */]);
+  }, [isEventCreated, isEventUpdated]);
 
   useEffect(() => {
     if (isEventDeleted) {
@@ -168,53 +203,29 @@ export function AdminCalendar() {
           date={date}
           handleDateChange={handleDateChange}
           getTeacherGroups={getTeacherGroups}
-          handleDialogOpen={handleDialogOpen}
+          teachers={teachers}
+          teachersLoading={teachersLoading}
+          groups={groups}
+          groupsLoading={groupsLoading}
           shouldUpdateSubmissionData={shouldUpdateSubmissionData}
           updateSubmissionData={updateSubmissionData}
           checkSubmissionStatus={checkSubmissionStatus}
+          dialogOpen={dialogOpen}
+          handleDialogOpen={handleDialogOpen}
+          handleDialogClose={handleDialogClose}
+          handleSubmitStart={handleSubmitStart}
+          cancelSubmit={cancelSubmit}
+          event={event}
+          deletableEvent={deletableEvent}
+          updateDeleteChangeMode={updateDeleteChangeMode}
+          handleDeleteOpen={handleDeleteOpen}
+          handleDeleteClose={handleDeleteClose}
+          handleDelete={handleDelete}
         />
-        {dialogOpen && (
-          <EventDialog
-            event={event}
-            isOpen={dialogOpen}
-            handleClose={handleDialogClose}
-            getTeacherGroups={getTeacherGroups}
-            teachers={teachers}
-            groups={groups}
-            teachersLoading={teachersLoading}
-            shouldUpdateSubmissionData={shouldUpdateSubmissionData}
-            updateSubmissionData={updateSubmissionData}
-            handleSubmitStart={handleSubmitStart}
-            checkSubmissionStatus={checkSubmissionStatus}
-            handleDeleteOpen={handleDeleteOpen}
-          />
-        )}
-        {deletableEvent &&
-          (deletableEvent.pattern === 'once' ? (
-            <ConfirmationDialog
-              open={Boolean(
-                deletableEvent && deletableEvent.pattern === 'once'
-              )}
-              onConfirm={handleDelete}
-              onCancel={handleDeleteClose}
-              message="Are you sure you want to delete this lesson?"
-            />
-          ) : (
-            <ChangeModeDialog
-              message="Deleting Lesson"
-              value={deletableEvent.changeMode}
-              handleChange={updateDeleteChangeMode}
-              onCancel={handleDeleteClose}
-              onConfirm={handleDelete}
-              open={Boolean(
-                deletableEvent && deletableEvent.pattern !== 'once'
-              )}
-            />
-          ))}
-        {(isEventCreated || isEventDeleted) && (
+        {(isEventCreated || isEventDeleted || isEventUpdated) && (
           <TopCenterSnackbar
             message="Success"
-            open={isEventCreated || isEventDeleted}
+            open={isEventCreated || isEventDeleted || isEventUpdated}
           />
         )}
       </Fragment>

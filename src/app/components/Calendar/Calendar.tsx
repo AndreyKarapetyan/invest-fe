@@ -1,33 +1,58 @@
 import { Box, TableContainer } from '@mui/material';
-import { convertToMinutes, generateTimeSlots, TimeSlot } from './utils';
-import { DatePicker } from './DatePicker';
-// import { events } from './mockData';
 import {
-  Fragment,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+  convertToMinutes,
+  generateTimeSlots,
+  getNextTimeSlot,
+  getPrevTimeSlot,
+  TimeSlot,
+} from './utils';
+import { DatePicker } from './DatePicker';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { ScheduleTable } from './ScheduleTable';
 import { SLIDER_WIDTH } from 'src/app/constants';
+import { EventDialog } from './EventDialog';
+import { ConfirmationDialog } from '../Confirmation';
+import { ChangeModeDialog } from './ChangeModeDialog';
+import { ChangeMode } from 'src/app/types/changeMode';
 
-export const Calendar = memo(function Calendar({
+export function Calendar({
   rooms,
   events,
   date,
+  getTeacherGroups,
   handleDateChange,
   handleDialogOpen,
   shouldUpdateSubmissionData,
   updateSubmissionData,
   checkSubmissionStatus,
+  dialogOpen,
+  handleDialogClose,
+  teachers,
+  teachersLoading,
+  groups,
+  groupsLoading,
+  handleSubmitStart,
+  cancelSubmit,
+  event,
+  deletableEvent,
+  updateDeleteChangeMode,
+  handleDeleteOpen,
+  handleDeleteClose,
+  handleDelete,
 }: any) {
   const times = useMemo(generateTimeSlots, []);
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
   const [selectedStart, setSelectedStart] = useState<TimeSlot | null>(null);
   const [selectedEnd, setSelectedEnd] = useState<TimeSlot | null>(null);
+
+  const handleStartChange = (timeSlot: TimeSlot) => {
+    setSelectedStart(timeSlot);
+  };
+
+  const handleEndChange = (timeSlot: TimeSlot) => {
+    setSelectedEnd(timeSlot);
+  };
 
   const handleMouseDown = useCallback((roomId: any, timeSlot: any) => {
     const eventAtCurrentPosition = getEventAtPosition(roomId, timeSlot);
@@ -48,12 +73,14 @@ export const Calendar = memo(function Calendar({
   }, [isSelecting]);
 
   const handleMouseEnter = useCallback(
-    (_: any, timeSlot: TimeSlot) => {
+    (_: any, { hour, minute }: TimeSlot) => {
       if (isSelecting) {
-        const { hour, minute } = timeSlot;
-        console.log('Entering ', timeSlot)
         const selectedTime = convertToMinutes(times[`${hour} ${minute}`]);
         const startTime = convertToMinutes(selectedStart!);
+        const timeSlot =
+          selectedTime < startTime
+            ? getPrevTimeSlot({ hour, minute })
+            : { hour, minute };
         const isEventInSelectionRange = events.some(
           ({ start, end, roomId }: any) =>
             selectedRoom === roomId &&
@@ -140,6 +167,20 @@ export const Calendar = memo(function Calendar({
     }
   }, [shouldUpdateSubmissionData]);
 
+  useEffect(() => {
+    if (
+      event &&
+      event.start &&
+      event.end &&
+      !shouldUpdateSubmissionData.startedSubmitProcess
+    ) {
+      setSelectedStart(event.start);
+      setSelectedEnd(event.end);
+    }
+  }, [event]);
+
+  console.log(event);
+
   return (
     <Fragment>
       <Box sx={{ marginTop: 7, position: 'fixed' }}>
@@ -166,7 +207,66 @@ export const Calendar = memo(function Calendar({
           handleEventClick={handleDialogOpen}
         />
       </TableContainer>
-      
+      {dialogOpen && (
+        <EventDialog
+          event={event}
+          isOpen={dialogOpen}
+          handleClose={handleDialogClose}
+          getTeacherGroups={getTeacherGroups}
+          teachers={teachers}
+          groups={groups}
+          teachersLoading={teachersLoading}
+          shouldUpdateSubmissionData={shouldUpdateSubmissionData}
+          updateSubmissionData={updateSubmissionData}
+          handleSubmitStart={handleSubmitStart}
+          checkSubmissionStatus={checkSubmissionStatus}
+          handleDeleteOpen={handleDeleteOpen}
+          times={times}
+          startTime={selectedStart}
+          endTime={selectedEnd}
+          handleStartChange={handleStartChange}
+          handleEndChange={handleEndChange}
+        />
+      )}
+      {deletableEvent &&
+        (deletableEvent.pattern === 'once' ? (
+          <ConfirmationDialog
+            open={Boolean(deletableEvent && deletableEvent.pattern === 'once')}
+            onConfirm={handleDelete}
+            onCancel={handleDeleteClose}
+            message="Are you sure you want to delete this lesson?"
+          />
+        ) : (
+          <ChangeModeDialog
+            message="Deleting Lesson"
+            value={deletableEvent.changeMode}
+            handleChange={updateDeleteChangeMode}
+            onCancel={handleDeleteClose}
+            onConfirm={handleDelete}
+            open={Boolean(deletableEvent && deletableEvent.pattern !== 'once')}
+          />
+        ))}
+      {shouldUpdateSubmissionData.startedSubmitProcess &&
+        event.id &&
+        !shouldUpdateSubmissionData.changeModeConfirmed &&
+        event.pattern !== 'once' && (
+          <ChangeModeDialog
+            message="Updating Lesson"
+            value={event.changeMode}
+            handleChange={(value: ChangeMode) => {
+              updateSubmissionData({ changeMode: value });
+              // checkSubmissionStatus('changeMode', false);
+            }}
+            onCancel={cancelSubmit}
+            onConfirm={() => checkSubmissionStatus('changeModeConfirmed', true)}
+            open={Boolean(
+              shouldUpdateSubmissionData.startedSubmitProcess &&
+                event.id &&
+                !shouldUpdateSubmissionData.changeModeConfirmed &&
+                event.pattern !== 'once'
+            )}
+          />
+        )}
     </Fragment>
   );
-});
+}
