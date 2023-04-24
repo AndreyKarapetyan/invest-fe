@@ -41,14 +41,18 @@ export const Calendar = memo(function Calendar({
   }, []);
 
   const handleMouseUp = useCallback(() => {
-    setIsSelecting(false);
-    handleDialogOpen();
-  }, []);
+    if (isSelecting) {
+      console.log(1321513413511352);
+      setIsSelecting(false);
+      handleDialogOpen();
+    }
+  }, [isSelecting]);
 
   const handleMouseEnter = useCallback(
     (_: any, timeSlot: TimeSlot) => {
       if (isSelecting) {
         const { hour, minute } = timeSlot;
+        console.log('Entering ', timeSlot)
         const selectedTime = convertToMinutes(times[`${hour} ${minute}`]);
         const startTime = convertToMinutes(selectedStart!);
         const isEventInSelectionRange = events.some(
@@ -76,7 +80,7 @@ export const Calendar = memo(function Calendar({
 
   const isSelected = useCallback(
     (roomId: number, timeSlot: TimeSlot) => {
-      if (roomId === selectedRoom) {
+      if (roomId === selectedRoom && isSelecting) {
         const selectedTime = convertToMinutes(timeSlot);
         const startTime = convertToMinutes(selectedStart!);
         const endTime = convertToMinutes(selectedEnd!);
@@ -87,7 +91,7 @@ export const Calendar = memo(function Calendar({
       }
       return false;
     },
-    [selectedRoom, selectedStart, selectedEnd]
+    [selectedRoom, selectedStart, selectedEnd, isSelecting]
   );
 
   const getEventAtPosition = useCallback(
@@ -133,6 +137,7 @@ export const Calendar = memo(function Calendar({
         roomId: selectedRoom,
       });
       checkSubmissionStatus('slots', false);
+      setIsSelecting(false);
     }
   }, [shouldUpdateSubmissionData]);
 

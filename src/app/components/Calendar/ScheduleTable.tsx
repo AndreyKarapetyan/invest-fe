@@ -158,7 +158,7 @@ export function ScheduleTable({
                         teacherFullName={event.teacherFullName}
                         groupName={event.groupName}
                         height={getEventHeight(event.start, event.end)}
-                        handleEventClick={handleEventClick}
+                        handleEventClick={() => handleEventClick(event)}
                       />
                     )}
                   <EventSelection

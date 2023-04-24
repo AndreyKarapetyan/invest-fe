@@ -2,6 +2,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   DialogActions,
@@ -13,11 +14,16 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
-  SelectChangeEvent,
   TextField,
 } from '@mui/material';
 import { Fragment, useEffect, useState } from 'react';
-import { StyledAutoComplete, StyledDialog, StyledFormControl } from './styled';
+import {
+  StyledAutoComplete,
+  StyledCheckBoxFormControl,
+  StyledDialog,
+  StyledFormControl,
+} from './styled';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const optionOnce = { value: 'once', name: "Don't repeat" };
 const weekDays = [
@@ -43,6 +49,7 @@ export function EventDialog({
   updateSubmissionData,
   handleSubmitStart,
   checkSubmissionStatus,
+  handleDeleteOpen,
 }: any) {
   const [eventData, setEventData] = useState(
     event || {
@@ -99,13 +106,16 @@ export function EventDialog({
     }
   };
 
-  const handlePatternChange = (event: SelectChangeEvent<any>) => {
+  const handlePatternChange = (event: any) => {
     const {
-      target: { value: eventValue },
+      target: { value: eventValue, checked },
     } = event;
-    const value = eventValue.includes(optionOnce.value)
-      ? [optionOnce.value]
-      : eventValue;
+    let value;
+    if (typeof checked === 'boolean') {
+      value = checked ? [optionOnce.value] : [];
+    } else if (eventValue) {
+      value = eventValue;
+    }
     handleEventDataChange('pattern', value.join(','));
   };
 
@@ -115,6 +125,10 @@ export function EventDialog({
       checkSubmissionStatus('ids', false);
     }
   }, [shouldUpdateSubmissionData]);
+
+  const isOncePattern = Boolean(
+    eventData.pattern && eventData.pattern.includes(optionOnce.value)
+  );
 
   return (
     <StyledDialog open={isOpen} onClose={handleClose}>
@@ -191,6 +205,15 @@ export function EventDialog({
               />
             )}
           />
+          <StyledCheckBoxFormControl
+            control={
+              <Checkbox
+                checked={isOncePattern}
+                onChange={handlePatternChange}
+              />
+            }
+            label={optionOnce.name}
+          />
           <StyledFormControl>
             <InputLabel id="multiple-select-weekday">Repeat</InputLabel>
             <Select
@@ -198,38 +221,31 @@ export function EventDialog({
               labelId="multiple-select-weekday"
               id="select-multiple"
               multiple
-              value={(eventData.pattern && eventData.pattern.split(',')) || []}
+              disabled={isOncePattern}
+              value={
+                (!isOncePattern &&
+                  eventData.pattern &&
+                  eventData.pattern.split(',')) ||
+                []
+              }
               onChange={handlePatternChange}
               input={<OutlinedInput id="select-multiple" label="Repeat" />}
               renderValue={(selected: string[]) => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selected.map((value: any) => (
                     <Chip
-                      sx={{
-                        fontSize: value === optionOnce.value ? '16px' : null,
-                      }}
                       key={value}
                       label={
-                        value === optionOnce.value
-                          ? optionOnce.name
-                          : weekDays.find((weekDay) => weekDay.value === value)
-                              ?.name
+                        weekDays.find((weekDay) => weekDay.value === value)
+                          ?.name
                       }
                     />
                   ))}
                 </Box>
               )}
             >
-              <MenuItem value={optionOnce.value}>{optionOnce.name}</MenuItem>
               {weekDays.map(({ name, value }) => (
-                <MenuItem
-                  disabled={Boolean(
-                    eventData.pattern &&
-                      eventData.pattern.includes(optionOnce.value)
-                  )}
-                  key={name}
-                  value={value}
-                >
+                <MenuItem key={name} value={value}>
                   {name}
                 </MenuItem>
               ))}
@@ -237,7 +253,17 @@ export function EventDialog({
           </StyledFormControl>
         </Grid>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        {event.id ? (
+          <Button
+            onClick={() => handleDeleteOpen(event)}
+            startIcon={<DeleteIcon />}
+          >
+            Delete
+          </Button>
+        ) : (
+          <Box />
+        )}
         <Button autoFocus onClick={handleSubmitStart}>
           Save Changes
         </Button>
