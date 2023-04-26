@@ -1,16 +1,13 @@
-import axios, { AxiosInstance, AxiosPromise, /* AxiosRequestConfig */ } from 'axios';
+import axios, { AxiosInstance, AxiosPromise } from 'axios';
 import qs from 'qs';
-import { BASE_API_URL } from '../../config';
-// import { getAuth } from '~/utils/auth/getAuth';
-// import KEYS from './localstorage-keys';
+import { BASE_API_URL, USER_REFRESH_TOKEN_URL } from '../../config';
+import { getAuth, LOCAL_STORAGE_KEYS, setAuth } from './auth';
 
-/* const setTokenInterceptors = (instance: AxiosInstance): void => {
+const setTokenInterceptors = (instance: AxiosInstance): void => {
   instance.interceptors.request.use(
-    (config: AxiosRequestConfig) => {
+    (config) => {
       const { accessToken } = getAuth();
       if (accessToken) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
       return config;
@@ -29,11 +26,11 @@ import { BASE_API_URL } from '../../config';
         const { refreshToken: refresh_token } = getAuth();
         if (refresh_token) {
           const { data } = await instance.post(USER_REFRESH_TOKEN_URL, {
-            refreshToken: getAuth().refreshToken,
+            refreshToken: refresh_token,
           });
           const { accessToken, refreshToken } = data;
-          localStorage.setItem(KEYS.ACCESS_TOKEN, accessToken);
-          localStorage.setItem(KEYS.REFRESH_TOKEN, refreshToken);
+          setAuth(LOCAL_STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+          setAuth(LOCAL_STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
           originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
           return instance(originalRequest);
         }
@@ -41,7 +38,7 @@ import { BASE_API_URL } from '../../config';
       throw new Error(error);
     }
   );
-}; */
+};
 
 export class Api {
   static instance: Api;
@@ -57,7 +54,7 @@ export class Api {
         'Content-Type': 'application/json',
       },
     });
-    // setTokenInterceptors(this.axiosInstance);
+    setTokenInterceptors(this.axiosInstance);
   }
 
   static getInstance(): Api {
