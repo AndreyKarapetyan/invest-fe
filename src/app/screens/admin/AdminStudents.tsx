@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add';
 import { AdminStudentDialog } from 'src/app/components/admin/AdminStudentDialog';
 import { BranchContext } from 'src/app/components/admin/WithBranches';
-import { Button, Fade, Grid, LinearProgress } from '@mui/material';
+import { Button, debounce, Fade, Grid, LinearProgress } from '@mui/material';
 import { ConfirmationDialog } from 'src/app/components/Confirmation';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
@@ -29,6 +29,7 @@ const columns = [
 export function AdminStudents() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [student, setStudent] = useState<any>(null);
+  const [searchString, setSearchString] = useState('');
   const [deletableStudent, setDeletableStudent] = useState<number | null>(null);
   const [isLoadingShowing, setIsLoadingShowing] = useState(false);
   const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
@@ -59,9 +60,25 @@ export function AdminStudents() {
   const branchDetails = useContext<any>(BranchContext);
   const currentBranch = branchDetails?.name;
 
+  const debouncedGetStudents = useCallback(
+    debounce((searchString: string) => {
+      getStudents(currentBranch, true, searchString);
+    }, 300),
+    [currentBranch, getStudents]
+  );
+
+  const handleSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { value } = event.target;
+      setSearchString(value);
+      debouncedGetStudents(value);
+    },
+    [debouncedGetStudents]
+  );
+
   const loadMore = useCallback(() => {
-    getStudents(currentBranch);
-  }, [currentBranch, getStudents]);
+    getStudents(currentBranch, false, searchString);
+  }, [currentBranch, getStudents, searchString]);
 
   const handleDialogClose = useCallback(() => {
     setDialogOpen(false);
@@ -114,7 +131,7 @@ export function AdminStudents() {
 
   useEffect(() => {
     if (isStudentCreated || isStudentUpdated) {
-      getStudents(currentBranch, true);
+      getStudents(currentBranch, true, searchString);
       setTimeout(() => {
         resetStudentCreationSuccess();
         resetStudentUpdateSuccess();
@@ -125,7 +142,7 @@ export function AdminStudents() {
 
   useEffect(() => {
     if (isStudentDeleted) {
-      getStudents(currentBranch, true);
+      getStudents(currentBranch, true, searchString);
       setTimeout(() => {
         resetStudentDeleteSuccess();
       }, 2000);
@@ -148,7 +165,10 @@ export function AdminStudents() {
   return (
     <Grid width="80%" marginX="auto">
       <Grid container justifyContent="space-between" alignItems="center">
-        <SearchField sx={{ marginY: 3, marginX: 2, width: '60vh' }} />
+        <SearchField
+          sx={{ marginY: 3, marginX: 2, width: '60vh' }}
+          onChange={handleSearchChange}
+        />
         <Button
           sx={{
             marginY: 3,

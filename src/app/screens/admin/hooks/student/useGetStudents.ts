@@ -9,34 +9,40 @@ export function useGetStudents() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const getStudents = useCallback((branchName: null | string, isReset = false) => {
-    if (isReset) {
-      setSkip(0);
-      setHasMore(true);
-      setData([]);
-    }
-    (async function () {
-      try {
-        setLoading(true);
-        const { data: response } = await Api.get(`/students/superadmin`, {
-          qs: {
-            pagination: { take, skip: isReset ? 0 : skip },
-            branch: { branchName },
-          },
-        });
-        setData((prevData) => {
-          const newData = isReset ? response.data : prevData.concat(response.data);
-          setHasMore(newData.length < response.count);
-          return newData;
-        });
-        setSkip((prevSkip) => isReset ? take : prevSkip + take);
-      } catch (err: any) {
-        setError(err);
-      } finally {
-        setLoading(false);
+  const getStudents = useCallback(
+    (branchName: null | string, isReset = false, search?: string) => {
+      if (isReset) {
+        setSkip(0);
+        setHasMore(true);
+        setData([]);
       }
-    })();
-  }, [skip]);
+      (async function () {
+        try {
+          setLoading(true);
+          const { data: response } = await Api.get(`/students/superadmin`, {
+            qs: {
+              pagination: { take, skip: isReset ? 0 : skip },
+              branch: { branchName },
+              search,
+            },
+          });
+          setData((prevData) => {
+            const newData = isReset
+              ? response.data
+              : prevData.concat(response.data);
+            setHasMore(newData.length < response.count);
+            return newData;
+          });
+          setSkip((prevSkip) => (isReset ? take : prevSkip + take));
+        } catch (err: any) {
+          setError(err);
+        } finally {
+          setLoading(false);
+        }
+      })();
+    },
+    [skip]
+  );
 
   const resetStudents = () => {
     setSkip(0);
