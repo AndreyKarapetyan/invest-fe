@@ -12,7 +12,7 @@ import { useGetTeacherGroups, useGetTeachers } from './hooks/teacher';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import { ChangeMode } from 'src/app/types/changeMode';
 
-export function AdminCalendar() {
+export default function AdminCalendar() {
   const currentBranch = useContext(BranchContext) as any;
   const [date, setDate] = useState(moment());
   const [shouldUpdateSubmissionData, setShouldUpdateSubmissionData] = useState({

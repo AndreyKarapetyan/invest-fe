@@ -1,7 +1,3 @@
-import { AdminCalendar } from './screens/admin/AdminCalendar';
-import { AdminStudents } from './screens/admin/AdminStudents';
-import { AdminTeacher } from './screens/admin/AdminTeacher';
-import { AdminTeachers } from './screens/admin/AdminTeachers';
 import {
   CALENDAR_ROUTE,
   HOME_ROUTE,
@@ -16,6 +12,12 @@ import { Route, Routes } from 'react-router-dom';
 import { WithBranches } from './components/admin/WithBranches';
 import { SuperAdminRoute } from './components/admin/SuperAdminRoute';
 import { Home } from './components/Home';
+import { lazy } from 'react';
+
+const AdminStudents = lazy(() => import('./screens/admin/AdminStudents'));
+const AdminTeachers = lazy(() => import('./screens/admin/AdminTeachers'));
+const AdminTeacher = lazy(() => import('./screens/admin/AdminTeacher'));
+const AdminCalendar = lazy(() => import('./screens/admin/AdminCalendar'));
 
 export function App() {
   return (

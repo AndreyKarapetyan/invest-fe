@@ -16,7 +16,7 @@ import { deepClone } from 'src/app/utils/deepClone';
 import { isEmail, isPositive, isStrongPassword } from 'class-validator';
 import { TeacherLevel } from 'src/app/types/teacher';
 
-export function AdminTeacher(props: any) {
+export default function AdminTeacher(props: any) {
   const { branchName, teacherId } = useParams();
   const navigate = useNavigate();
   const [teacherData, setTeacherData] = useState({

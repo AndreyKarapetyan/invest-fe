@@ -16,7 +16,7 @@ const columns = [
   { label: 'Lastname', name: 'lastname' },
 ];
 
-export function AdminTeachers() {
+export default function AdminTeachers() {
   const [deletableTeacher, setDeletableTeacher] = useState<number | null>(null);
   const [isLoadingShowing, setIsLoadingShowing] = useState(false);
   const { teachers, teachersLoading, getTeachers } = useGetTeachers();

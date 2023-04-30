@@ -26,7 +26,7 @@ const columns = [
   { label: 'Teacher', name: 'teacherFullName' },
 ];
 
-export function AdminStudents() {
+export default function AdminStudents() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [student, setStudent] = useState<any>(null);
   const [searchString, setSearchString] = useState('');

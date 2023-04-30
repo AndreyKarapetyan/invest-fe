@@ -7,8 +7,6 @@ import StudentsIcon from 'src/assets/student.png';
 import TeachersIcon from 'src/assets/teacher.png';
 import CalendarIcon from 'src/assets/calendar.png';
 
-import { useNavigate } from 'react-router-dom';
-
 const AdminMenuSliderOptions = [
   {
     icon: TeachersIcon,
@@ -33,13 +31,12 @@ const AdminMenuSliderOptions = [
   },
 ];
 
-export function AdminMenuSliderList() {
-  const navigate = useNavigate();
+export function AdminMenuSliderList({ onClick }: any) {
   return (
     <List>
       {AdminMenuSliderOptions.map(({ icon, text, width, height, url }) => (
         <ListItem key={text} disablePadding>
-          <ListItemButton onClick={() => navigate(url)}>
+          <ListItemButton onClick={() => onClick(url)}>
             <ListItemIcon>
               <img src={icon} alt={`${text} Icon`} style={{ width, height }} />
             </ListItemIcon>
