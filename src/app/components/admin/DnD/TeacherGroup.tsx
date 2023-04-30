@@ -10,6 +10,7 @@ import { TeacherStudent } from './TeacherStudent';
 export function TeacherGroup({
   group: { id, name, students },
   handleGroupNameChange,
+  nameError,
   handleGroupDelete,
 }: any) {
   return (
@@ -61,6 +62,9 @@ export function TeacherGroup({
             label="Group Name"
             name="groupName"
             value={name}
+            required
+            error={nameError}
+            helperText={nameError ? 'Group name must not be empty' : ''}
             onChange={(e) => handleGroupNameChange(id, e.target.value)}
           />
           {students.map((student: any, index: any) => (

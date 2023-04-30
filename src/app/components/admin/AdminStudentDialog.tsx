@@ -159,7 +159,7 @@ export function AdminStudentDialog({
 
   const onSaveChanges = () => {
     const { name, lastname, actualFee, formalFee, email, teacherId, status, groupId, groupName } = studentData;
-    const errors: Partial<typeof formErrors> = {
+    const errors: typeof formErrors = {
       name: !validationFuncMapping.name(name),
       lastname: !validationFuncMapping.lastname(lastname),
       actualFee: !validationFuncMapping.actualFee(actualFee),
@@ -243,7 +243,7 @@ export function AdminStudentDialog({
             value={studentData.email}
             variant="outlined"
             error={formErrors.email}
-            helperText={formErrors.email ? 'Invalid email' : ''}
+            helperText={formErrors.email ? 'Invalid email format' : ''}
             onChange={onInputChange}
           />
           <StyledFormControl required>

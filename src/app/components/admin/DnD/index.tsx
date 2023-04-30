@@ -18,8 +18,10 @@ export function DnD({
   loadMore,
   handleGroupChange,
   shouldUpdateGroupsFromDnD,
+  cancelSubmit,
 }: any) {
   const [groups, setGroups] = useState<any>(inputGroups);
+  const [groupNameErrors, setGroupNameErrors] = useState<{ [index: string]: boolean }>({});
   const previousInputGroups = useRef(null);
   const gridRef = useInfiniteLoading({
     hasMore,
@@ -31,6 +33,10 @@ export function DnD({
     const groupsCopy = deepClone(groups);
     groupsCopy[groupId].name = newName;
     setGroups(groupsCopy);
+    setGroupNameErrors((curErrors) => ({
+      ...curErrors,
+      [groupId]: !newName,
+    }));
   };
 
   const handleGroupDelete = (groupId: number) => {
@@ -79,10 +85,7 @@ export function DnD({
 
   useEffect(() => {
     let groupsCopy: any;
-    if (
-      !previousInputGroups.current ||
-      !isEqual(previousInputGroups.current, inputGroups)
-    ) {
+    if (!previousInputGroups.current || !isEqual(previousInputGroups.current, inputGroups)) {
       groupsCopy = deepClone(inputGroups);
       previousInputGroups.current = inputGroups;
     } else {
@@ -104,42 +107,38 @@ export function DnD({
 
   useEffect(() => {
     if (shouldUpdateGroupsFromDnD) {
-      handleGroupChange(groups);
+      const errors = Object.entries(groups).reduce((acc: { [index: string]: boolean }, [key, { name }]: any) => {
+        if (key === 'studentList') {
+          return acc;
+        }
+        acc[key] = !name;
+        return acc;
+      }, {});
+      console.log(errors);
+      setGroupNameErrors(errors as any);
+      const areErrors = Object.values(errors).some((err) => err);
+      if (areErrors) {
+        cancelSubmit();
+      } else {
+        handleGroupChange(groups);
+      }
     }
   }, [shouldUpdateGroupsFromDnD]);
 
-  const teacherGroups = Object.values(groups).filter(
-    (group: any) => group.id !== 'studentList'
-  );
+  const teacherGroups = Object.values(groups).filter((group: any) => group.id !== 'studentList');
   const allStudentsList = groups['studentList'].students;
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Grid
-        container
-        direction="row"
-        flexWrap="wrap"
-        justifyContent="space-between"
-        height="800px"
-      >
-        <Grid
-          container
-          direction="column"
-          width="50%"
-          justifyContent="flex-start"
-          alignItems="center"
-        >
+      <Grid container direction="row" flexWrap="wrap" justifyContent="space-between" height="800px">
+        <Grid container direction="column" width="50%" justifyContent="flex-start" alignItems="center">
           <Box component="h2">Groups</Box>
-          <Grid
-            container
-            justifyContent="space-around"
-            alignItems="center"
-            marginY={3}
-          >
+          <Grid container justifyContent="space-around" alignItems="center" marginY={3}>
             {teacherGroups.map((group: any) => (
               <TeacherGroup
                 key={group.id}
                 group={group}
+                nameError={groupNameErrors[group.id]}
                 handleGroupNameChange={handleGroupNameChange}
                 handleGroupDelete={handleGroupDelete}
               />
@@ -168,9 +167,7 @@ export function DnD({
           paddingLeft="10%"
         >
           <Box component="h2">List of Students</Box>
-          <SearchField
-            sx={{ marginY: 3, marginX: 2, width: '52%', minWidth: '250px' }}
-          />
+          <SearchField sx={{ marginY: 3, marginX: 2, width: '52%', minWidth: '250px' }} />
           {areStudentsLoading && (
             <Fade
               in={areStudentsLoading}

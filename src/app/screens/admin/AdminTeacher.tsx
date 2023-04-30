@@ -13,6 +13,8 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import { deepClone } from 'src/app/utils/deepClone';
+import { isEmail, isPositive, isStrongPassword } from 'class-validator';
+import { TeacherLevel } from 'src/app/types/teacher';
 
 export function AdminTeacher(props: any) {
   const { branchName, teacherId } = useParams();
@@ -34,6 +36,24 @@ export function AdminTeacher(props: any) {
       },
     },
   });
+  const [formErrors, setFormErrors] = useState({
+    name: false,
+    lastname: false,
+    email: false,
+    password: false,
+    level: false,
+    phoneNumber: false,
+    salaryPercent: false,
+  });
+  const validationFuncMapping = {
+    name: (name: any) => name,
+    lastname: (lastname: any) => lastname,
+    email: (email: any) => isEmail(email),
+    password: (password: any) => isStrongPassword(password),
+    level: (level: any) => Object.values(TeacherLevel).includes(level),
+    phoneNumber: (phoneNumber: any) => phoneNumber,
+    salaryPercent: (salaryPercent: any) => salaryPercent && isPositive(Number(salaryPercent))
+  };
   const { teacherLoading, teacherError, teacher, getTeacher } = useGetTeacher();
   const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
   const [shouldUpdateGroupsFromDnD, setShouldUpdateGroupsFromDnD] =
@@ -63,9 +83,14 @@ export function AdminTeacher(props: any) {
   }, [getStudents]);
 
   const handleTeacherDataChange = (key: string, value: any) => {
+    console.log(key, value, !validationFuncMapping[key as keyof typeof validationFuncMapping](value))
     setTeacherData((curTeacher: any) => ({
       ...curTeacher,
       [key]: value,
+    }));
+    setFormErrors((curErrors) => ({
+      ...curErrors,
+      [key]: !validationFuncMapping[key as keyof typeof validationFuncMapping](value),
     }));
   };
 
@@ -83,8 +108,27 @@ export function AdminTeacher(props: any) {
   }, []);
 
   const handleSubmitStart = () => {
-    setShouldUpdateGroupsFromDnD(true);
+    const { name, lastname, email, level, password, phoneNumber, salaryPercent } = teacherData;
+    const errors: typeof formErrors = {
+      name: !validationFuncMapping.name(name),
+      lastname: !validationFuncMapping.lastname(lastname),
+      email: !validationFuncMapping.email(email),
+      level: !validationFuncMapping.level(level),
+      password: !validationFuncMapping.password(password),
+      phoneNumber: !validationFuncMapping.phoneNumber(phoneNumber),
+      salaryPercent: !validationFuncMapping.salaryPercent(salaryPercent),
+    };
+    setFormErrors(errors as any);
+    const areErrors = Object.values(errors).some((err) => err);
+    if (!areErrors) {
+      console.log('Going to submit!!!!!!')
+     setShouldUpdateGroupsFromDnD(true);
+    }
   };
+
+  const cancelSubmit = () => {
+    setShouldUpdateGroupsFromDnD(false);
+  }
 
   useEffect(() => {
     const id = Number(teacherId);
@@ -228,6 +272,7 @@ export function AdminTeacher(props: any) {
           justifyContent="space-evenly"
         >
           <TeacherFormComponents
+            formErrors={formErrors}
             teacherData={teacherData}
             onInputChange={onInputChange}
           />
@@ -240,6 +285,7 @@ export function AdminTeacher(props: any) {
           inputGroups={teacherData.groups}
           handleGroupChange={handleGroupChange}
           shouldUpdateGroupsFromDnD={shouldUpdateGroupsFromDnD}
+          cancelSubmit={cancelSubmit}
         />
       </Grid>
     </Box>
