@@ -1,16 +1,12 @@
 import moment from 'moment';
 import { BranchContext } from 'src/app/components/admin/WithBranches';
 import { Calendar } from 'src/app/components/Calendar/Calendar';
-import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
-import {
-  useCreateEvent,
-  useDeleteEvent,
-  useGetEvents,
-  useUpdateEvent,
-} from './hooks/events';
-import { useGetTeacherGroups, useGetTeachers } from './hooks/teacher';
-import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import { ChangeMode } from 'src/app/types/changeMode';
+import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
+import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
+import { useCreateEvent, useDeleteEvent, useGetEvents, useUpdateEvent } from './hooks/events';
+import { useErrorBoundary } from 'react-error-boundary';
+import { useGetTeacherGroups, useGetTeachers } from './hooks/teacher';
 
 export default function AdminCalendar() {
   const currentBranch = useContext(BranchContext) as any;
@@ -26,29 +22,15 @@ export default function AdminCalendar() {
   const [deletableEvent, setDeletableEvent] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { events, eventsLoading, eventsError, getEvents } = useGetEvents();
-  const { teachers, teachersLoading, getTeachers } = useGetTeachers();
-  const { groups, groupsLoading, getTeacherGroups } = useGetTeacherGroups();
-  const {
-    isEventCreated,
-    eventCreationError,
-    eventCreationLoading,
-    createEvent,
-    resetEventCreationSuccess,
-  } = useCreateEvent();
-  const {
-    isEventUpdated,
-    updateEvent,
-    eventUpdateError,
-    eventUpdateLoading,
-    resetEventUpdateSuccess,
-  } = useUpdateEvent();
-  const {
-    isEventDeleted,
-    deleteEvent,
-    eventDeleteError,
-    eventDeleteLoading,
-    resetEventDeleteSuccess,
-  } = useDeleteEvent();
+  const { teachers, teachersLoading, getTeachers, teachersError } = useGetTeachers();
+  const { groups, groupsLoading, getTeacherGroups, groupsError } = useGetTeacherGroups();
+  const { isEventCreated, eventCreationError, eventCreationLoading, createEvent, resetEventCreationSuccess } =
+    useCreateEvent();
+  const { isEventUpdated, updateEvent, eventUpdateError, eventUpdateLoading, resetEventUpdateSuccess } =
+    useUpdateEvent();
+  const { isEventDeleted, deleteEvent, eventDeleteError, eventDeleteLoading, resetEventDeleteSuccess } =
+    useDeleteEvent();
+  const { showBoundary } = useErrorBoundary();
 
   const handleDialogClose = useCallback(() => {
     setDialogOpen(false);
@@ -60,8 +42,7 @@ export default function AdminCalendar() {
       if (eventData) {
         setEvent({
           ...eventData,
-          changeMode:
-            event.pattern === 'once' ? ChangeMode.ALL : ChangeMode.ONCE,
+          changeMode: event.pattern === 'once' ? ChangeMode.ALL : ChangeMode.ONCE,
           date: date.format(),
         });
         if (eventData.teacherId) {
@@ -70,7 +51,7 @@ export default function AdminCalendar() {
       }
       setDialogOpen(true);
     },
-    [getTeacherGroups]
+    [getTeacherGroups],
   );
 
   const handleDateChange = useCallback((newDate: any) => {
@@ -101,12 +82,9 @@ export default function AdminCalendar() {
     setEvent((curData: any) => ({ ...curData, ...inputData }));
   }, []);
 
-  const checkSubmissionStatus = useCallback(
-    (key: keyof typeof shouldUpdateSubmissionData, status: boolean) => {
-      setShouldUpdateSubmissionData((checks) => ({ ...checks, [key]: status }));
-    },
-    []
-  );
+  const checkSubmissionStatus = useCallback((key: keyof typeof shouldUpdateSubmissionData, status: boolean) => {
+    setShouldUpdateSubmissionData((checks) => ({ ...checks, [key]: status }));
+  }, []);
 
   const updateDeleteChangeMode = useCallback((changeMode: ChangeMode) => {
     setDeletableEvent((curData: any) => ({ ...curData, changeMode }));
@@ -120,7 +98,7 @@ export default function AdminCalendar() {
         date: date.format(),
       });
     },
-    [date]
+    [date],
   );
 
   const handleDeleteClose = useCallback(() => {
@@ -154,17 +132,14 @@ export default function AdminCalendar() {
   }, [currentBranch, date]);
 
   useEffect(() => {
-    console.log(shouldUpdateSubmissionData)
+    console.log(shouldUpdateSubmissionData);
     if (
       shouldUpdateSubmissionData.startedSubmitProcess &&
       !shouldUpdateSubmissionData.date &&
       !shouldUpdateSubmissionData.ids &&
       !shouldUpdateSubmissionData.slots
     ) {
-      if (
-        event.id &&
-        shouldUpdateSubmissionData.changeModeConfirmed
-      ) {
+      if (event.id && shouldUpdateSubmissionData.changeModeConfirmed) {
         updateEvent(event);
         checkSubmissionStatus('startedSubmitProcess', false);
       } else if (!event.id) {
@@ -193,6 +168,9 @@ export default function AdminCalendar() {
       }, 2000);
     }
   }, [isEventDeleted]);
+
+  const error =
+    eventsError || teachersError || groupsError || eventCreationError || eventUpdateError || eventDeleteError;
 
   return (
     currentBranch && (
@@ -223,11 +201,9 @@ export default function AdminCalendar() {
           handleDelete={handleDelete}
         />
         {(isEventCreated || isEventDeleted || isEventUpdated) && (
-          <TopCenterSnackbar
-            message="Success"
-            open={isEventCreated || isEventDeleted || isEventUpdated}
-          />
+          <TopCenterSnackbar message="Success" open={isEventCreated || isEventDeleted || isEventUpdated} />
         )}
+        {error && showBoundary(error)}
       </Fragment>
     )
   );

@@ -1,20 +1,17 @@
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { Box, Button, Grid } from '@mui/material';
+import { deepClone } from 'src/app/utils/deepClone';
 import { DnD } from 'src/app/components/admin/DnD';
+import { isEmail, isPositive, isStrongPassword } from 'class-validator';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { TeacherFormComponents } from 'src/app/components/admin/SimpleFormComponents/TeacherFormComponents';
-import { useCallback, useEffect, useState } from 'react';
-import { useGetStudents } from './hooks/student';
-import {
-  useCreateTeacher,
-  useGetTeacher,
-  useUpdateTeacher,
-} from './hooks/teacher';
-import { useNavigate, useParams } from 'react-router-dom';
-import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
-import { deepClone } from 'src/app/utils/deepClone';
-import { isEmail, isPositive, isStrongPassword } from 'class-validator';
 import { TeacherLevel } from 'src/app/types/teacher';
+import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
+import { useCallback, useEffect, useState } from 'react';
+import { useCreateTeacher, useGetTeacher, useUpdateTeacher } from './hooks/teacher';
+import { useErrorBoundary } from 'react-error-boundary';
+import { useGetStudents } from './hooks/student';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export default function AdminTeacher(props: any) {
   const { branchName, teacherId } = useParams();
@@ -52,27 +49,16 @@ export default function AdminTeacher(props: any) {
     password: (password: any) => isStrongPassword(password),
     level: (level: any) => Object.values(TeacherLevel).includes(level),
     phoneNumber: (phoneNumber: any) => phoneNumber,
-    salaryPercent: (salaryPercent: any) => salaryPercent && isPositive(Number(salaryPercent))
+    salaryPercent: (salaryPercent: any) => salaryPercent && isPositive(Number(salaryPercent)),
   };
   const { teacherLoading, teacherError, teacher, getTeacher } = useGetTeacher();
-  const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
-  const [shouldUpdateGroupsFromDnD, setShouldUpdateGroupsFromDnD] =
-    useState(false);
+  const { students, studentsLoading, hasMore, getStudents, studentsError } = useGetStudents();
+  const [shouldUpdateGroupsFromDnD, setShouldUpdateGroupsFromDnD] = useState(false);
   const [shouldSubmit, setShouldSubmit] = useState(false);
-  const {
-    newTeacherId,
-    resetTeacherId,
-    createTeacher,
-    teacherCreateError,
-    teacherCreateLoading,
-  } = useCreateTeacher();
-  const {
-    isTeacherUpdated,
-    resetTeacherUpdateSuccess,
-    teacherUpdateError,
-    teacherUpdateLoading,
-    updateTeacher,
-  } = useUpdateTeacher();
+  const { newTeacherId, resetTeacherId, createTeacher, teacherCreateError, teacherCreateLoading } = useCreateTeacher();
+  const { isTeacherUpdated, resetTeacherUpdateSuccess, teacherUpdateError, teacherUpdateLoading, updateTeacher } =
+    useUpdateTeacher();
+  const { showBoundary } = useErrorBoundary();
 
   const goBackToTheList = () => {
     navigate('/teachers');
@@ -83,7 +69,7 @@ export default function AdminTeacher(props: any) {
   }, [getStudents]);
 
   const handleTeacherDataChange = (key: string, value: any) => {
-    console.log(key, value, !validationFuncMapping[key as keyof typeof validationFuncMapping](value))
+    console.log(key, value, !validationFuncMapping[key as keyof typeof validationFuncMapping](value));
     setTeacherData((curTeacher: any) => ({
       ...curTeacher,
       [key]: value,
@@ -121,14 +107,14 @@ export default function AdminTeacher(props: any) {
     setFormErrors(errors as any);
     const areErrors = Object.values(errors).some((err) => err);
     if (!areErrors) {
-      console.log('Going to submit!!!!!!')
-     setShouldUpdateGroupsFromDnD(true);
+      console.log('Going to submit!!!!!!');
+      setShouldUpdateGroupsFromDnD(true);
     }
   };
 
   const cancelSubmit = () => {
     setShouldUpdateGroupsFromDnD(false);
-  }
+  };
 
   useEffect(() => {
     const id = Number(teacherId);
@@ -159,9 +145,7 @@ export default function AdminTeacher(props: any) {
   useEffect(() => {
     if (shouldSubmit) {
       const data = deepClone(teacherData);
-      const groups = Object.values(data.groups).filter(
-        ({ id }) => id !== 'studentList'
-      );
+      const groups = Object.values(data.groups).filter(({ id }) => id !== 'studentList');
       if (teacherId === 'new') {
         const submissionData = {
           ...data,
@@ -199,18 +183,13 @@ export default function AdminTeacher(props: any) {
     }
   }, [isTeacherUpdated]);
 
-  return teacherLoading ||
+  const error = teacherError || studentsError || teacherCreateError || teacherUpdateError;
+
+  return teacherLoading || // @TODO: Do as in AdminStudents
     teacherCreateLoading ||
     teacherUpdateLoading ||
     !students.length ? (
-    <LoadingIndicator
-      open={
-        teacherLoading ||
-        teacherCreateLoading ||
-        teacherUpdateLoading ||
-        !students.length
-      }
-    />
+    <LoadingIndicator open={teacherLoading || teacherCreateLoading || teacherUpdateLoading || !students.length} />
   ) : (
     <Box
       sx={{
@@ -221,10 +200,7 @@ export default function AdminTeacher(props: any) {
       }}
     >
       {(newTeacherId || isTeacherUpdated) && (
-        <TopCenterSnackbar
-          message="Success"
-          open={Boolean(newTeacherId) || isTeacherUpdated}
-        />
+        <TopCenterSnackbar message="Success" open={Boolean(newTeacherId) || isTeacherUpdated} />
       )}
       <Grid container justifyContent="space-between">
         <Button
@@ -257,25 +233,9 @@ export default function AdminTeacher(props: any) {
           Save Changes
         </Button>
       </Grid>
-      <Grid
-        container
-        direction="column"
-        flexWrap="wrap"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Grid
-          width="80%"
-          container
-          direction="row"
-          flexWrap="wrap"
-          justifyContent="space-evenly"
-        >
-          <TeacherFormComponents
-            formErrors={formErrors}
-            teacherData={teacherData}
-            onInputChange={onInputChange}
-          />
+      <Grid container direction="column" flexWrap="wrap" justifyContent="center" alignItems="center">
+        <Grid width="80%" container direction="row" flexWrap="wrap" justifyContent="space-evenly">
+          <TeacherFormComponents formErrors={formErrors} teacherData={teacherData} onInputChange={onInputChange} />
         </Grid>
         <DnD
           hasMore={hasMore}
@@ -288,6 +248,7 @@ export default function AdminTeacher(props: any) {
           cancelSubmit={cancelSubmit}
         />
       </Grid>
+      {error && showBoundary(error)}
     </Box>
   );
 }

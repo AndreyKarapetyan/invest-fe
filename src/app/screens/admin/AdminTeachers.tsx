@@ -2,12 +2,13 @@ import AddIcon from '@mui/icons-material/Add';
 import { BranchContext } from 'src/app/components/admin/WithBranches';
 import { Button, Fade, Grid, LinearProgress } from '@mui/material';
 import { ConfirmationDialog } from 'src/app/components/Confirmation';
-import { useContext, useEffect, useRef, useState } from 'react';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { SearchField } from 'src/app/components/SearchField';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useDeleteTeacher, useGetTeachers } from './hooks/teacher';
+import { useErrorBoundary } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
 
 const columns = [
@@ -19,18 +20,14 @@ const columns = [
 export default function AdminTeachers() {
   const [deletableTeacher, setDeletableTeacher] = useState<number | null>(null);
   const [isLoadingShowing, setIsLoadingShowing] = useState(false);
-  const { teachers, teachersLoading, getTeachers } = useGetTeachers();
-  const {
-    teacherDeleteLoading,
-    teacherDeleteError,
-    isTeacherDeleted,
-    resetTeacherDeleteSuccess,
-    deleteTeacher,
-  } = useDeleteTeacher();
+  const { teachersError, teachers, teachersLoading, getTeachers } = useGetTeachers();
+  const { teacherDeleteLoading, teacherDeleteError, isTeacherDeleted, resetTeacherDeleteSuccess, deleteTeacher } =
+    useDeleteTeacher();
   const loadingTimeOut = useRef<any>();
   const branchDetails = useContext<any>(BranchContext);
   const currentBranch = branchDetails?.name;
   const navigate = useNavigate();
+  const { showBoundary } = useErrorBoundary();
 
   const handleDeleteOpen = (teacherId: number) => {
     setDeletableTeacher(teacherId);
@@ -73,6 +70,8 @@ export default function AdminTeachers() {
     }
   }, [teacherDeleteLoading]);
 
+  const error = teachersError || teacherDeleteError;
+
   return (
     <Grid width="80%" marginX="auto">
       <Grid container justifyContent="space-between" alignItems="center">
@@ -111,9 +110,7 @@ export default function AdminTeachers() {
         onDelete={handleDeleteOpen}
         hasMore={false}
       />
-      {isTeacherDeleted && (
-        <TopCenterSnackbar message="Success" open={isTeacherDeleted} />
-      )}
+      {isTeacherDeleted && <TopCenterSnackbar message="Success" open={isTeacherDeleted} />}
       {deletableTeacher && (
         <ConfirmationDialog
           open={Boolean(deletableTeacher)}
@@ -123,6 +120,7 @@ export default function AdminTeachers() {
         />
       )}
       {isLoadingShowing && <LoadingIndicator open={isLoadingShowing} />}
+      {error && showBoundary(error)}
     </Grid>
   );
 }

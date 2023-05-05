@@ -8,12 +8,8 @@ import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { SearchField } from 'src/app/components/SearchField';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import {
-  useCreateStudent,
-  useDeleteStudent,
-  useGetStudents,
-  useUpdateStudent,
-} from './hooks/student';
+import { useCreateStudent, useDeleteStudent, useGetStudents, useUpdateStudent } from './hooks/student';
+import { useErrorBoundary } from 'react-error-boundary';
 import { useGetTeacherGroups, useGetTeachers } from './hooks/teacher';
 
 const columns = [
@@ -32,23 +28,13 @@ export default function AdminStudents() {
   const [searchString, setSearchString] = useState('');
   const [deletableStudent, setDeletableStudent] = useState<number | null>(null);
   const [isLoadingShowing, setIsLoadingShowing] = useState(false);
-  const { students, studentsLoading, hasMore, getStudents } = useGetStudents();
-  const { teachers, teachersLoading, getTeachers } = useGetTeachers();
-  const { groups, groupsLoading, getTeacherGroups } = useGetTeacherGroups();
-  const {
-    studentCreationError,
-    resetStudentCreationSuccess,
-    isStudentCreated,
-    studentCreationLoading,
-    createStudent,
-  } = useCreateStudent();
-  const {
-    isStudentUpdated,
-    resetStudentUpdateSuccess,
-    studentUpdateError,
-    studentUpdateLoading,
-    updateStudent,
-  } = useUpdateStudent();
+  const { studentsError, students, studentsLoading, hasMore, getStudents } = useGetStudents();
+  const { teachersError, teachers, teachersLoading, getTeachers } = useGetTeachers();
+  const { groupsError, groups, groupsLoading, getTeacherGroups } = useGetTeacherGroups();
+  const { studentCreationError, resetStudentCreationSuccess, isStudentCreated, studentCreationLoading, createStudent } =
+    useCreateStudent();
+  const { isStudentUpdated, resetStudentUpdateSuccess, studentUpdateError, studentUpdateLoading, updateStudent } =
+    useUpdateStudent();
   const {
     deleteStudent,
     isStudentDeleted,
@@ -59,12 +45,13 @@ export default function AdminStudents() {
   const loadingTimeOut = useRef<any>();
   const branchDetails = useContext<any>(BranchContext);
   const currentBranch = branchDetails?.name;
+  const { showBoundary } = useErrorBoundary();
 
   const debouncedGetStudents = useCallback(
     debounce((searchString: string) => {
       getStudents(currentBranch, true, searchString);
     }, 300),
-    [currentBranch, getStudents]
+    [currentBranch, getStudents],
   );
 
   const handleSearchChange = useCallback(
@@ -73,7 +60,7 @@ export default function AdminStudents() {
       setSearchString(value);
       debouncedGetStudents(value);
     },
-    [debouncedGetStudents]
+    [debouncedGetStudents],
   );
 
   const loadMore = useCallback(() => {
@@ -96,7 +83,7 @@ export default function AdminStudents() {
       getTeachers(currentBranch);
       setDialogOpen(true);
     },
-    [currentBranch, getTeacherGroups, getTeachers]
+    [currentBranch, getTeacherGroups, getTeachers],
   );
 
   const handleDialogSubmit = useCallback(
@@ -107,7 +94,7 @@ export default function AdminStudents() {
         createStudent({ ...studentData, branchName: currentBranch });
       }
     },
-    [currentBranch]
+    [currentBranch],
   );
 
   const handleDeleteOpen = useCallback((studentId: number) => {
@@ -150,11 +137,7 @@ export default function AdminStudents() {
   }, [isStudentDeleted]);
 
   useEffect(() => {
-    if (
-      studentCreationLoading ||
-      studentUpdateLoading ||
-      studentDeleteLoading
-    ) {
+    if (studentCreationLoading || studentUpdateLoading || studentDeleteLoading) {
       loadingTimeOut.current = setTimeout(() => setIsLoadingShowing(true), 100);
     } else {
       clearTimeout(loadingTimeOut.current);
@@ -162,13 +145,13 @@ export default function AdminStudents() {
     }
   }, [studentCreationLoading, studentUpdateLoading, studentDeleteLoading]);
 
+  const error =
+    studentsError || teachersError || groupsError || studentCreationError || studentUpdateError || studentDeleteError;
+
   return (
     <Grid width="80%" marginX="auto">
       <Grid container justifyContent="space-between" alignItems="center">
-        <SearchField
-          sx={{ marginY: 3, marginX: 2, width: '60vh' }}
-          onChange={handleSearchChange}
-        />
+        <SearchField sx={{ marginY: 3, marginX: 2, width: '60vh' }} onChange={handleSearchChange} />
         <Button
           sx={{
             marginY: 3,
@@ -218,10 +201,7 @@ export default function AdminStudents() {
         />
       )}
       {(isStudentCreated || isStudentUpdated || isStudentDeleted) && (
-        <TopCenterSnackbar
-          message="Success"
-          open={isStudentCreated || isStudentUpdated || isStudentDeleted}
-        />
+        <TopCenterSnackbar message="Success" open={isStudentCreated || isStudentUpdated || isStudentDeleted} />
       )}
       {deletableStudent && (
         <ConfirmationDialog
@@ -232,6 +212,7 @@ export default function AdminStudents() {
         />
       )}
       {isLoadingShowing && <LoadingIndicator open={isLoadingShowing} />}
+      {error && showBoundary(error)}
     </Grid>
   );
 }
