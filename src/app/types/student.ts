@@ -1,4 +1,4 @@
 export enum StudentStatus {
-    Pending = 'Pending',
-    Registered = 'Registered'
+  Pending = 'Pending',
+  Registered = 'Registered',
 }

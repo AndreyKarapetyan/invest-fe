@@ -179,8 +179,6 @@ export function Calendar({
     }
   }, [event]);
 
-  console.log(event);
-
   return (
     <Fragment>
       <Box sx={{ marginTop: 7, position: 'fixed' }}>

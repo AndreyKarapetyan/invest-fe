@@ -1,12 +1,14 @@
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { BranchContext } from 'src/app/components/admin/WithBranches';
-import { Button, Fade, Grid, LinearProgress } from '@mui/material';
+import { Button, Fade, Grid, IconButton, LinearProgress, Tooltip } from '@mui/material';
 import { ConfirmationDialog } from 'src/app/components/Confirmation';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { SearchField } from 'src/app/components/SearchField';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useDeleteTeacher, useGetTeachers } from './hooks/teacher';
 import { useErrorBoundary } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +28,7 @@ export default function AdminTeachers() {
   const loadingTimeOut = useRef<any>();
   const branchDetails = useContext<any>(BranchContext);
   const currentBranch = branchDetails?.name;
+  const [isPending, startTransition] = useTransition();
   const navigate = useNavigate();
   const { showBoundary } = useErrorBoundary();
 
@@ -43,7 +46,7 @@ export default function AdminTeachers() {
   };
 
   const navigateToTeacherPage = (teacher?: any) => {
-    navigate(teacher ? `./${currentBranch}/${teacher.id}` : `./${currentBranch}/new`);
+    startTransition(() => navigate(teacher ? `./${currentBranch}/${teacher.id}` : `./${currentBranch}/new`));
   };
 
   useEffect(() => {
@@ -71,6 +74,39 @@ export default function AdminTeachers() {
   }, [teacherDeleteLoading]);
 
   const error = teachersError || teacherDeleteError;
+
+  const columns = useMemo(
+    () => [
+      { label: 'Id', name: 'id', Component: Fragment, withValue: true },
+      { label: 'Name', name: 'name', Component: Fragment, withValue: true },
+      { label: 'Lastname', name: 'lastname', Component: Fragment, withValue: true },
+      {
+        label: '',
+        name: '',
+        Component: ({ row }: any) => (
+          <Tooltip title="Edit">
+            <IconButton onClick={() => navigateToTeacherPage(row)} size="small">
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+        ),
+        withValue: false,
+      },
+      {
+        label: '',
+        name: '',
+        Component: ({ row }: any) => (
+          <Tooltip title="Delete">
+            <IconButton onClick={() => handleDeleteOpen(row.id)} size="small">
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        ),
+        withValue: false,
+      },
+    ],
+    [],
+  );
 
   return (
     <Grid width="80%" marginX="auto">

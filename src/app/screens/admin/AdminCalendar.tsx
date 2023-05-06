@@ -132,7 +132,6 @@ export default function AdminCalendar() {
   }, [currentBranch, date]);
 
   useEffect(() => {
-    console.log(shouldUpdateSubmissionData);
     if (
       shouldUpdateSubmissionData.startedSubmitProcess &&
       !shouldUpdateSubmissionData.date &&

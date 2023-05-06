@@ -2,6 +2,7 @@ import {
   CALENDAR_ROUTE,
   HOME_ROUTE,
   LOGIN_ROUTE,
+  PAYMENTS_ROUTE,
   STUDENTS_LIST_ROUTE,
   TEACHER_ROUTE,
   TEACHERS_LIST_ROUTE,
@@ -18,6 +19,7 @@ const AdminStudents = lazy(() => import('./screens/admin/AdminStudents'));
 const AdminTeachers = lazy(() => import('./screens/admin/AdminTeachers'));
 const AdminTeacher = lazy(() => import('./screens/admin/AdminTeacher'));
 const AdminCalendar = lazy(() => import('./screens/admin/AdminCalendar'));
+const AdminPayments = lazy(() => import('./screens/admin/AdminPayments'));
 
 export function App() {
   return (
@@ -58,6 +60,16 @@ export function App() {
           <SuperAdminRoute>
             <WithBranches>
               <AdminCalendar />
+            </WithBranches>
+          </SuperAdminRoute>
+        }
+      />
+      <Route
+        path={PAYMENTS_ROUTE}
+        element={
+          <SuperAdminRoute>
+            <WithBranches>
+              <AdminPayments />
             </WithBranches>
           </SuperAdminRoute>
         }

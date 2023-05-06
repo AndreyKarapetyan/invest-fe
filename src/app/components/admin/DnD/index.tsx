@@ -114,7 +114,6 @@ export function DnD({
         acc[key] = !name;
         return acc;
       }, {});
-      console.log(errors);
       setGroupNameErrors(errors as any);
       const areErrors = Object.values(errors).some((err) => err);
       if (areErrors) {

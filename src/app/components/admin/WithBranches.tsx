@@ -12,7 +12,7 @@ export function WithBranches(props: any) {
   const loadingTimeOut = useRef<any>();
 
   const handleBranchChange = (_event: any, branchName: any) => {
-    const branch = branches.find((branch) => branch.name === branchName)
+    const branch = branches.find((branch) => branch.name === branchName);
     setCurrentBranch(branch);
   };
 
@@ -59,11 +59,9 @@ export function WithBranches(props: any) {
             ))}
           </Tabs>
         )}
-        {isLoadingShowing && <LoadingIndicator open={isLoadingShowing} />}
       </Box>
-      <BranchContext.Provider value={currentBranch}>
-        {props.children}
-      </BranchContext.Provider>
+      {currentBranch && <BranchContext.Provider value={currentBranch}>{props.children}</BranchContext.Provider>}
+      {isLoadingShowing && <LoadingIndicator open={isLoadingShowing} />}
     </Fragment>
   );
 }

@@ -9,9 +9,6 @@ export function EventSelection({
   handleMouseEnter,
   isSelected,
 }: any) {
-  if (isSelected) {
-    console.log('But it is still selected');
-  }
   return (
     <Box
       sx={{

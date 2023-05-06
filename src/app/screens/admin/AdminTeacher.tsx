@@ -69,7 +69,6 @@ export default function AdminTeacher(props: any) {
   }, [getStudents]);
 
   const handleTeacherDataChange = (key: string, value: any) => {
-    console.log(key, value, !validationFuncMapping[key as keyof typeof validationFuncMapping](value));
     setTeacherData((curTeacher: any) => ({
       ...curTeacher,
       [key]: value,
@@ -107,7 +106,6 @@ export default function AdminTeacher(props: any) {
     setFormErrors(errors as any);
     const areErrors = Object.values(errors).some((err) => err);
     if (!areErrors) {
-      console.log('Going to submit!!!!!!');
       setShouldUpdateGroupsFromDnD(true);
     }
   };

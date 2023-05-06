@@ -1,28 +1,22 @@
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { AdminStudentDialog } from 'src/app/components/admin/AdminStudentDialog';
 import { BranchContext } from 'src/app/components/admin/WithBranches';
-import { Button, debounce, Fade, Grid, LinearProgress } from '@mui/material';
+import { Button, debounce, Fade, Grid, IconButton, LinearProgress, Tooltip } from '@mui/material';
 import { ConfirmationDialog } from 'src/app/components/Confirmation';
+import { Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { SearchField } from 'src/app/components/SearchField';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useCreateStudent, useDeleteStudent, useGetStudents, useUpdateStudent } from './hooks/student';
 import { useErrorBoundary } from 'react-error-boundary';
 import { useGetTeacherGroups, useGetTeachers } from './hooks/teacher';
 
-const columns = [
-  { label: 'Id', name: 'id' },
-  { label: 'Name', name: 'name' },
-  { label: 'Lastname', name: 'lastname' },
-  { label: 'Status', name: 'status' },
-  { label: 'Formal Fee', name: 'formalFee' },
-  { label: 'Actual Fee', name: 'actualFee' },
-  { label: 'Teacher', name: 'teacherFullName' },
-];
-
 export default function AdminStudents() {
+  const branchDetails = useContext<any>(BranchContext);
+  const currentBranch = branchDetails?.name;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [student, setStudent] = useState<any>(null);
   const [searchString, setSearchString] = useState('');
@@ -43,8 +37,6 @@ export default function AdminStudents() {
     studentDeleteLoading,
   } = useDeleteStudent();
   const loadingTimeOut = useRef<any>();
-  const branchDetails = useContext<any>(BranchContext);
-  const currentBranch = branchDetails?.name;
   const { showBoundary } = useErrorBoundary();
 
   const debouncedGetStudents = useCallback(
@@ -112,7 +104,7 @@ export default function AdminStudents() {
 
   useEffect(() => {
     if (currentBranch) {
-      getStudents(currentBranch, true);
+      getStudents(currentBranch, true, searchString);
     }
   }, [currentBranch]);
 
@@ -144,6 +136,43 @@ export default function AdminStudents() {
       setIsLoadingShowing(false);
     }
   }, [studentCreationLoading, studentUpdateLoading, studentDeleteLoading]);
+
+  const columns = useMemo(
+    () => [
+      { label: 'Id', name: 'id', Component: Fragment, withValue: true },
+      { label: 'Name', name: 'name', Component: Fragment, withValue: true },
+      { label: 'Lastname', name: 'lastname', Component: Fragment, withValue: true },
+      { label: 'Status', name: 'status', Component: Fragment, withValue: true },
+      { label: 'Formal Fee', name: 'formalFee', Component: Fragment, withValue: true },
+      { label: 'Actual Fee', name: 'actualFee', Component: Fragment, withValue: true },
+      { label: 'Teacher', name: 'teacherFullName', Component: Fragment, withValue: true },
+      {
+        label: '',
+        name: '',
+        Component: ({ row }: any) => (
+          <Tooltip title="Edit">
+            <IconButton onClick={() => handleDialogOpen(row)} size="small">
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+        ),
+        withValue: false,
+      },
+      {
+        label: '',
+        name: '',
+        Component: ({ row }: any) => (
+          <Tooltip title="Delete">
+            <IconButton onClick={() => handleDeleteOpen(row.id)} size="small">
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        ),
+        withValue: false,
+      },
+    ],
+    [],
+  );
 
   const error =
     studentsError || teachersError || groupsError || studentCreationError || studentUpdateError || studentDeleteError;
@@ -179,14 +208,7 @@ export default function AdminStudents() {
           <LinearProgress />
         </Fade>
       )}
-      <InfiniteLoadingTable
-        columns={columns}
-        rows={students}
-        onEdit={handleDialogOpen}
-        onDelete={handleDeleteOpen}
-        loadMore={loadMore}
-        hasMore={hasMore}
-      />
+      <InfiniteLoadingTable columns={columns} rows={students} loadMore={loadMore} hasMore={hasMore} />
       {dialogOpen && (
         <AdminStudentDialog
           student={student}

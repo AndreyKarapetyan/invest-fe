@@ -172,7 +172,6 @@ export function AdminStudentDialog({
     };
     setFormErrors(errors as any);
     const areErrors = Object.values(errors).some((err) => err);
-    console.log(errors, Object.values(errors), areErrors);
     if (!areErrors) {
       handleSubmit(studentData);
     }

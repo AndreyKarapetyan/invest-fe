@@ -2,7 +2,8 @@ import { FallbackProps, ErrorBoundary as ReactErrorBoundary } from 'react-error-
 import { Button, Container, Grid, Typography } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
-const FallbackComponent = ({ resetErrorBoundary }: FallbackProps) => {
+const FallbackComponent = ({ resetErrorBoundary, error }: FallbackProps) => {
+  console.log('The critical error is: ', error);
   return (
     <Container maxWidth="sm">
       <Grid
