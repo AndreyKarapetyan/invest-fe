@@ -1,6 +1,5 @@
 import { AdminMenuSliderList } from './AdminMenuSliderList';
 import { getAuth } from 'src/app/utils/auth';
-import { LoadingIndicator } from '../LoadingIndicator';
 import { LOGIN_ROUTE } from 'src/app/routeNames';
 import { MenuSlider } from '../MenuSlider/MenuSlider';
 import { Role } from 'src/app/types/role';

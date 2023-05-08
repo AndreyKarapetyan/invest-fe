@@ -3,19 +3,19 @@ import { AllStudents } from './AllStudents';
 import { Box, Button, Fade, Grid, LinearProgress } from '@mui/material';
 import { deepClone } from 'src/app/utils/deepClone';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
-import { isEqual } from 'lodash';
+import { isEqual, set } from 'lodash';
 import { SearchField } from '../../SearchField';
 import { TeacherGroup } from './TeacherGroup';
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
 import { v4 as uuid } from 'uuid';
 
 export function DnD({
   inputGroups,
   students,
-  hasMore,
+  // hasMore,
   areStudentsLoading,
-  loadMore,
+  // loadMore,
   handleGroupChange,
   shouldUpdateGroupsFromDnD,
   cancelSubmit,
@@ -23,11 +23,16 @@ export function DnD({
   const [groups, setGroups] = useState<any>(inputGroups);
   const [groupNameErrors, setGroupNameErrors] = useState<{ [index: string]: boolean }>({});
   const previousInputGroups = useRef(null);
-  const gridRef = useInfiniteLoading({
-    hasMore,
-    isLoading: areStudentsLoading,
-    loadMore,
-  });
+  const [searchString, setSearchString] = useState('');
+  // const gridRef = useInfiniteLoading({
+  //   hasMore,
+  //   isLoading: areStudentsLoading,
+  //   loadMore,
+  // });
+
+  const handleSearchChange = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
+    setSearchString(value);
+  };
 
   const handleGroupNameChange = (groupId: string, newName: string) => {
     const groupsCopy = deepClone(groups);
@@ -125,7 +130,12 @@ export function DnD({
   }, [shouldUpdateGroupsFromDnD]);
 
   const teacherGroups = Object.values(groups).filter((group: any) => group.id !== 'studentList');
-  const allStudentsList = groups['studentList'].students;
+  // Need this workaround because DnD works with indexes
+  const allStudentsList = groups['studentList'].students.map(({ fullName, ...rest }: any) => ({
+    fullName,
+    ...rest,
+    isFilteredOut: !fullName.includes(searchString),
+  }));
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -166,7 +176,11 @@ export function DnD({
           paddingLeft="10%"
         >
           <Box component="h2">List of Students</Box>
-          <SearchField sx={{ marginY: 3, marginX: 2, width: '52%', minWidth: '250px' }} />
+          <SearchField
+            sx={{ marginY: 3, marginX: 2, width: '52%', minWidth: '250px' }}
+            value={searchString}
+            onChange={handleSearchChange}
+          />
           {areStudentsLoading && (
             <Fade
               in={areStudentsLoading}
@@ -184,7 +198,7 @@ export function DnD({
               />
             </Fade>
           )}
-          <AllStudents gridRef={gridRef} students={allStudentsList} />
+          <AllStudents /* gridRef={gridRef} */ students={allStudentsList} />
         </Grid>
       </Grid>
     </DragDropContext>

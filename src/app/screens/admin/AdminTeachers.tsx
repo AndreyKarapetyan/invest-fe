@@ -8,7 +8,7 @@ import { InfiniteLoadingTable } from 'src/app/components/InfiniteLoadingTable';
 import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { SearchField } from 'src/app/components/SearchField';
 import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
-import { Fragment, useContext, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { ChangeEvent, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useDeleteTeacher, useGetTeachers } from './hooks/teacher';
 import { useErrorBoundary } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
@@ -16,15 +16,20 @@ import { useNavigate } from 'react-router-dom';
 export function AdminTeachers() {
   const [deletableTeacher, setDeletableTeacher] = useState<number | null>(null);
   const [isLoadingShowing, setIsLoadingShowing] = useState(false);
-  const { teachersError, teachers, teachersLoading, getTeachers } = useGetTeachers();
+  const [searchString, setSearchString] = useState('');
+  const { teachersError, teachers: allTeachers, teachersLoading, getTeachers } = useGetTeachers();
   const { teacherDeleteLoading, teacherDeleteError, isTeacherDeleted, resetTeacherDeleteSuccess, deleteTeacher } =
     useDeleteTeacher();
   const loadingTimeOut = useRef<any>();
   const branchDetails = useContext<any>(BranchContext);
   const currentBranch = branchDetails?.name;
-  const [isPending, startTransition] = useTransition();
   const navigate = useNavigate();
   const { showBoundary } = useErrorBoundary();
+
+  const handleSearchChange = useCallback(
+    ({ target: { value } }: ChangeEvent<HTMLInputElement>) => setSearchString(value),
+    [],
+  );
 
   const handleDeleteOpen = (teacherId: number) => {
     setDeletableTeacher(teacherId);
@@ -102,10 +107,21 @@ export function AdminTeachers() {
     [],
   );
 
+  const teachers = allTeachers.filter(
+    ({ id, name, lastname }) =>
+      id.toString().includes(searchString) ||
+      name.toLowerCase().includes(searchString.toLowerCase()) ||
+      lastname.toLowerCase().includes(searchString.toLowerCase()),
+  );
+
   return (
     <Grid width="80%" marginX="auto">
       <Grid container justifyContent="space-between" alignItems="center">
-        <SearchField sx={{ marginY: 3, marginX: 2, width: '60vh' }} />
+        <SearchField
+          sx={{ marginY: 3, marginX: 2, width: '60vh' }}
+          value={searchString}
+          onChange={handleSearchChange}
+        />
         <Button
           sx={{
             marginY: 3,

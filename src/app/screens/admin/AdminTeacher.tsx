@@ -10,7 +10,7 @@ import { TopCenterSnackbar } from 'src/app/components/TopCenterSnackbar';
 import { useCallback, useEffect, useState } from 'react';
 import { useCreateTeacher, useGetTeacher, useUpdateTeacher } from './hooks/teacher';
 import { useErrorBoundary } from 'react-error-boundary';
-import { useGetStudents } from './hooks/student';
+import { useGetAllStudentsMinData, useGetStudents } from './hooks/student';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export function AdminTeacher(props: any) {
@@ -52,7 +52,7 @@ export function AdminTeacher(props: any) {
     salaryPercent: (salaryPercent: any) => salaryPercent && isPositive(Number(salaryPercent)),
   };
   const { teacherLoading, teacherError, teacher, getTeacher } = useGetTeacher();
-  const { students, studentsLoading, hasMore, getStudents, studentsError } = useGetStudents();
+  const { students, studentsLoading, getAllStudentsMinData, studentsError } = useGetAllStudentsMinData();
   const [shouldUpdateGroupsFromDnD, setShouldUpdateGroupsFromDnD] = useState(false);
   const [shouldSubmit, setShouldSubmit] = useState(false);
   const { newTeacherId, resetTeacherId, createTeacher, teacherCreateError, teacherCreateLoading } = useCreateTeacher();
@@ -64,9 +64,9 @@ export function AdminTeacher(props: any) {
     navigate('/teachers');
   };
 
-  const loadMore = useCallback(() => {
-    getStudents(branchName as string);
-  }, [getStudents]);
+  // const loadMore = useCallback(() => {
+  //   getStudents(branchName as string);
+  // }, [getStudents]);
 
   const handleTeacherDataChange = (key: string, value: any) => {
     setTeacherData((curTeacher: any) => ({
@@ -137,8 +137,10 @@ export function AdminTeacher(props: any) {
   }, [teacher]);
 
   useEffect(() => {
-    getStudents(branchName as string, true);
-  }, []);
+    if (branchName) {
+      getAllStudentsMinData({ branchName });
+    }
+  }, [branchName]);
 
   useEffect(() => {
     if (shouldSubmit) {
@@ -236,9 +238,9 @@ export function AdminTeacher(props: any) {
           <TeacherFormComponents formErrors={formErrors} teacherData={teacherData} onInputChange={onInputChange} />
         </Grid>
         <DnD
-          hasMore={hasMore}
+          // hasMore={hasMore}
           areStudentsLoading={studentsLoading}
-          loadMore={loadMore}
+          // loadMore={loadMore}
           students={students}
           inputGroups={teacherData.groups}
           handleGroupChange={handleGroupChange}
