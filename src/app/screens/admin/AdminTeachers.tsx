@@ -13,13 +13,7 @@ import { useDeleteTeacher, useGetTeachers } from './hooks/teacher';
 import { useErrorBoundary } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
 
-const columns = [
-  { label: 'Id', name: 'id' },
-  { label: 'Name', name: 'name' },
-  { label: 'Lastname', name: 'lastname' },
-];
-
-export default function AdminTeachers() {
+export function AdminTeachers() {
   const [deletableTeacher, setDeletableTeacher] = useState<number | null>(null);
   const [isLoadingShowing, setIsLoadingShowing] = useState(false);
   const { teachersError, teachers, teachersLoading, getTeachers } = useGetTeachers();
@@ -46,7 +40,7 @@ export default function AdminTeachers() {
   };
 
   const navigateToTeacherPage = (teacher?: any) => {
-    startTransition(() => navigate(teacher ? `./${currentBranch}/${teacher.id}` : `./${currentBranch}/new`));
+    navigate(teacher ? `./${currentBranch}/${teacher.id}` : `./${currentBranch}/new`);
   };
 
   useEffect(() => {

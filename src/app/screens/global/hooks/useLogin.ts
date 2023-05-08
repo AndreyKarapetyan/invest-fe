@@ -1,10 +1,15 @@
+import { AxiosError } from 'axios';
 import { useCallback, useState } from 'react';
 import { Api } from 'src/app/utils/Api';
 
 export function useLogin() {
   const [data, setData] = useState<any>(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+
+  const resetError = useCallback(() => {
+    setError(null);
+  }, []);
 
   const login = useCallback((data: any) => {
     (async function () {
@@ -23,6 +28,7 @@ export function useLogin() {
   return {
     authData: data,
     error,
+    resetError,
     loading,
     login,
   };

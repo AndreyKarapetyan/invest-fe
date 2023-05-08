@@ -35,7 +35,7 @@ const setTokenInterceptors = (instance: AxiosInstance): void => {
           return instance(originalRequest);
         }
       }
-      throw new Error(error);
+      throw error;
     }
   );
 };

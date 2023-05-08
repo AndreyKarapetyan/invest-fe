@@ -1,15 +1,16 @@
-import { useState } from 'react';
-import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import CssBaseline from '@mui/material/CssBaseline';
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
 import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import { SLIDER_WIDTH } from '../constants';
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import { AccountMenu } from './AccountMenu';
+import { SLIDER_WIDTH } from '../../constants';
+import { styled } from '@mui/material/styles';
+import { useState } from 'react';
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
   open?: boolean;
@@ -74,13 +75,11 @@ export function MenuSlider(props: any) {
       <CssBaseline />
       <AppBar position="fixed" open={open} color="transparent" elevation={0}>
         <Toolbar>
-          <IconButton
-            color="inherit"
-            onClick={handleDrawerOpen}
-            sx={{ mr: 2, ...(open && { display: 'none' }) }}
-          >
+          <IconButton color="inherit" onClick={handleDrawerOpen} sx={{ mr: 2, ...(open && { display: 'none' }) }}>
             <MenuIcon />
           </IconButton>
+          <Box sx={{ flexGrow: 1 }} />
+          <AccountMenu />
         </Toolbar>
       </AppBar>
       <Drawer

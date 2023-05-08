@@ -22,3 +22,9 @@ export const setAuth = (
 ) => {
   localStorage.setItem(key, value);
 };
+
+export const clearAuth = () => {
+  localStorage.removeItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN);
+  localStorage.removeItem(LOCAL_STORAGE_KEYS.REFRESH_TOKEN);
+  localStorage.removeItem(LOCAL_STORAGE_KEYS.ROLE);
+};

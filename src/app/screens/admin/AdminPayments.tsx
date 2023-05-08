@@ -31,7 +31,7 @@ import { PaymentStatus } from 'src/app/types/payment';
 import { AdminPaymentsDialog } from 'src/app/components/admin/AdminPaymentDialog';
 import { useGetAllStudentsMinData } from './hooks/student';
 
-export default function AdminPayments() {
+export function AdminPayments() {
   const branchDetails = useContext<any>(BranchContext);
   const currentBranch = branchDetails?.name;
   const [dialogOpen, setDialogOpen] = useState(false);

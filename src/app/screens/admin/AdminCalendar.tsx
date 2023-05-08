@@ -8,7 +8,7 @@ import { useCreateEvent, useDeleteEvent, useGetEvents, useUpdateEvent } from './
 import { useErrorBoundary } from 'react-error-boundary';
 import { useGetTeacherGroups, useGetTeachers } from './hooks/teacher';
 
-export default function AdminCalendar() {
+export function AdminCalendar() {
   const currentBranch = useContext(BranchContext) as any;
   const [date, setDate] = useState(moment());
   const [shouldUpdateSubmissionData, setShouldUpdateSubmissionData] = useState({

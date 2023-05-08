@@ -14,7 +14,7 @@ import { useCreateStudent, useDeleteStudent, useGetStudents, useUpdateStudent } 
 import { useErrorBoundary } from 'react-error-boundary';
 import { useGetTeacherGroups, useGetTeachers } from './hooks/teacher';
 
-export default function AdminStudents() {
+export function AdminStudents() {
   const branchDetails = useContext<any>(BranchContext);
   const currentBranch = branchDetails?.name;
   const [dialogOpen, setDialogOpen] = useState(false);

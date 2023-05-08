@@ -10,7 +10,7 @@ import { LoadingIndicator } from 'src/app/components/LoadingIndicator';
 import { useNavigate } from 'react-router-dom';
 import { Role } from 'src/app/types/role';
 import { STUDENTS_LIST_ROUTE } from 'src/app/routeNames';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useJwt } from 'react-jwt';
 import { useLogin } from './hooks';
 import { HOME_ROUTE } from '../../routeNames';
@@ -18,26 +18,31 @@ import { HOME_ROUTE } from '../../routeNames';
 export function Login() {
   const { accessToken } = getAuth();
   const { isExpired } = useJwt(accessToken || '');
-  const { login, authData, error, loading } = useLogin();
+  const { login, authData, error, loading, resetError } = useLogin();
   const navigate = useNavigate();
+  const [loginData, setLoginData] = useState<{ email: string; password: string }>({ email: '', password: '' });
+  const [isValidationError, setIsValidationError] = useState(false);
 
-  const handleSubmit = useCallback(
-    (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      const data = new FormData(event.currentTarget);
-      login({
-        email: data.get('email'),
-        password: data.get('password'),
-      });
+  const onInputChange = useCallback(
+    ({ target: { value = '', name = '' } }: React.ChangeEvent<HTMLInputElement>) => {
+      if (isValidationError) {
+        setIsValidationError(false);
+      }
+      setLoginData((prevState) => ({ ...prevState, [name]: value }));
     },
-    []
+    [isValidationError],
   );
+
+  const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    login(loginData);
+  }, [loginData]);
 
   useEffect(() => {
     if (accessToken && !isExpired) {
       navigate(HOME_ROUTE);
     }
-  }, [accessToken, isExpired])
+  }, [accessToken, isExpired]);
 
   useEffect(() => {
     if (authData) {
@@ -45,11 +50,16 @@ export function Login() {
       setAuth('accessToken', accessToken);
       setAuth('refreshToken', refreshToken);
       setAuth('role', role);
-      if (role === Role.SuperAdmin) {
-        navigate(STUDENTS_LIST_ROUTE);
-      }
+      navigate(HOME_ROUTE);
     }
   }, [authData]);
+
+  useEffect(() => {
+    if (error?.response) {
+      setIsValidationError(true);
+      resetError();
+    }
+  }, [error]);
 
   return (
     <Container maxWidth="xs">
@@ -71,29 +81,28 @@ export function Login() {
           <TextField
             margin="normal"
             required
+            error={isValidationError}
             fullWidth
             id="email"
             label="Email Address"
             name="email"
-            autoComplete="email"
-            autoFocus
+            value={loginData.email}
+            onChange={onInputChange}
           />
           <TextField
             margin="normal"
             required
+            error={isValidationError}
+            helperText={isValidationError ? 'Incorrect email or password' : ''}
             fullWidth
             name="password"
             label="Password"
             type="password"
             id="password"
-            autoComplete="current-password"
+            value={loginData.password}
+            onChange={onInputChange}
           />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
             Login
           </Button>
         </Box>

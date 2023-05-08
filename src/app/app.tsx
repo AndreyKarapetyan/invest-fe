@@ -1,3 +1,8 @@
+import { AdminCalendar } from './screens/admin/AdminCalendar';
+import { AdminPayments } from './screens/admin/AdminPayments';
+import { AdminStudents } from './screens/admin/AdminStudents';
+import { AdminTeacher } from './screens/admin/AdminTeacher';
+import { AdminTeachers } from './screens/admin/AdminTeachers';
 import {
   CALENDAR_ROUTE,
   HOME_ROUTE,
@@ -7,19 +12,12 @@ import {
   TEACHER_ROUTE,
   TEACHERS_LIST_ROUTE,
 } from './routeNames';
+import { Home } from './components/Home';
 import { Login } from './screens/global/Login';
 import { NotFound } from './screens/global/NotFound';
 import { Route, Routes } from 'react-router-dom';
-import { WithBranches } from './components/admin/WithBranches';
 import { SuperAdminRoute } from './components/admin/SuperAdminRoute';
-import { Home } from './components/Home';
-import { lazy } from 'react';
-
-const AdminStudents = lazy(() => import('./screens/admin/AdminStudents'));
-const AdminTeachers = lazy(() => import('./screens/admin/AdminTeachers'));
-const AdminTeacher = lazy(() => import('./screens/admin/AdminTeacher'));
-const AdminCalendar = lazy(() => import('./screens/admin/AdminCalendar'));
-const AdminPayments = lazy(() => import('./screens/admin/AdminPayments'));
+import { WithBranches } from './components/admin/WithBranches';
 
 export function App() {
   return (

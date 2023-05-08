@@ -13,7 +13,7 @@ import { useErrorBoundary } from 'react-error-boundary';
 import { useGetStudents } from './hooks/student';
 import { useNavigate, useParams } from 'react-router-dom';
 
-export default function AdminTeacher(props: any) {
+export function AdminTeacher(props: any) {
   const { branchName, teacherId } = useParams();
   const navigate = useNavigate();
   const [teacherData, setTeacherData] = useState({
