@@ -1,16 +1,15 @@
 import AddIcon from '@mui/icons-material/Add';
 import { AllStudents } from './AllStudents';
 import { Box, Button, Fade, Grid, LinearProgress } from '@mui/material';
+import { ChangeEvent, memo, useEffect, useRef, useState } from 'react';
 import { deepClone } from 'src/app/utils/deepClone';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
-import { isEqual, set } from 'lodash';
+import { isEqual } from 'lodash';
 import { SearchField } from '../../SearchField';
 import { TeacherGroup } from './TeacherGroup';
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { useInfiniteLoading } from 'src/app/hooks/useInfiniteLoading';
 import { v4 as uuid } from 'uuid';
 
-export function DnD({
+export const DnD = memo(function DnD({
   inputGroups,
   students,
   // hasMore,
@@ -203,4 +202,4 @@ export function DnD({
       </Grid>
     </DragDropContext>
   );
-}
+});

@@ -147,8 +147,8 @@ export function AdminStudents() {
       { label: 'Actual Fee', name: 'actualFee', Component: Fragment, withValue: true },
       { label: 'Teacher', name: 'teacherFullName', Component: Fragment, withValue: true },
       {
-        label: '',
-        name: '',
+        label: 'Edit',
+        name: 'edit',
         Component: ({ row }: any) => (
           <Tooltip title="Edit">
             <IconButton onClick={() => handleDialogOpen(row)} size="small">
@@ -159,8 +159,8 @@ export function AdminStudents() {
         withValue: false,
       },
       {
-        label: '',
-        name: '',
+        label: 'delete',
+        name: 'delete',
         Component: ({ row }: any) => (
           <Tooltip title="Delete">
             <IconButton onClick={() => handleDeleteOpen(row.id)} size="small">

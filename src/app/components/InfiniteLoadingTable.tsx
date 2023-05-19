@@ -1,38 +1,45 @@
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { memo } from 'react';
-import { useInfiniteLoading } from '../hooks/useInfiniteLoading';
+import { TableVirtuoso } from 'react-virtuoso';
+import React, { Fragment, memo } from 'react';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 
-export const InfiniteLoadingTable = memo(function InfiniteLoadingTable({
-  columns,
-  rows,
-  loadMore,
-  isLoading,
-  hasMore,
-}: any) {
-  const tableRef = useInfiniteLoading({ hasMore, isLoading, loadMore });
+const TableComponents = {
+  Scroller: TableContainer,
+  Table: (props: any) => <Table {...props} stickyHeader />,
+  TableHead,
+  TableRow: (props: any) => <TableRow {...props} hover />,
+  TableBody,
+};
 
+export const InfiniteLoadingTable = memo(function InfiniteLoadingTable({ columns, rows, loadMore }: any) {
   return (
-    <TableContainer sx={{ maxWidth: 'inherit', maxHeight: '70vh', margin: 'auto' }} ref={tableRef}>
-      <Table stickyHeader>
-        <TableHead>
-          <TableRow>
-            {columns.map((column: any) => (
-              <TableCell sx={{ textAlign: 'center' }} key={column.label}>{column.label}</TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row: any) => (
-            <TableRow key={row.id} hover>
-              {columns.map(({ label, name, Component, withValue }: any) => (
-                <TableCell sx={{ textAlign: 'center' }} key={`${row.id} ${label}`}>
-                  {withValue ? <Component>{row[name]}</Component> : <Component row={row} />}
-                </TableCell>
-              ))}
-            </TableRow>
+    <TableVirtuoso
+      style={{ maxHeight: '70vh', height: '70vh', margin: 'auto' }}
+      data={rows}
+      endReached={loadMore}
+      components={TableComponents}
+      fixedHeaderContent={() => (
+        <TableRow>
+          {columns.map(({ label, withValue }: any) => (
+            <TableCell sx={{ textAlign: 'center' }} key={label}>
+              {withValue ? label : null}
+            </TableCell>
           ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </TableRow>
+      )}
+      itemContent={(_index, row) => (
+        <Fragment>
+          {columns.map(({ label, name, Component, withValue }: any) => (
+            <TableCell sx={{ textAlign: 'center' }} key={`${row.id} ${name}`}>
+              {withValue ? <Component>{row[name]}</Component> : <Component row={row} />}
+            </TableCell>
+          ))}
+        </Fragment>
+      )}
+    />
   );
 });

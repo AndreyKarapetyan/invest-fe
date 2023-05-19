@@ -110,9 +110,9 @@ export function AdminTeacher(props: any) {
     }
   };
 
-  const cancelSubmit = () => {
+  const cancelSubmit = useCallback(() => {
     setShouldUpdateGroupsFromDnD(false);
-  };
+  }, []);
 
   useEffect(() => {
     const id = Number(teacherId);
