@@ -81,7 +81,7 @@ export function AdminStudents() {
   const handleDialogSubmit = useCallback(
     (studentData: any) => {
       if (studentData.id) {
-        updateStudent(studentData);
+        updateStudent({ ...studentData, branchName: currentBranch });
       } else {
         createStudent({ ...studentData, branchName: currentBranch });
       }
@@ -171,7 +171,7 @@ export function AdminStudents() {
         withValue: false,
       },
     ],
-    [],
+    [handleDeleteOpen, handleDialogOpen],
   );
 
   const error =
@@ -208,7 +208,7 @@ export function AdminStudents() {
           <LinearProgress />
         </Fade>
       )}
-      <InfiniteLoadingTable columns={columns} rows={students} loadMore={loadMore} hasMore={hasMore} />
+      <InfiniteLoadingTable columns={columns} rows={students} loadMore={loadMore} />
       {dialogOpen && (
         <AdminStudentDialog
           student={student}

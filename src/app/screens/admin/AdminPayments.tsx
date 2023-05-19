@@ -186,8 +186,8 @@ export function AdminPayments() {
         withValue: false,
       },
       {
-        label: '',
-        name: '',
+        label: 'Edit',
+        name: 'edit',
         Component: ({ row }: any) => (
           <Tooltip title="Delete">
             <IconButton onClick={() => handleDeleteOpen(row.id)} size="small">
@@ -198,7 +198,7 @@ export function AdminPayments() {
         withValue: false,
       },
     ],
-    [],
+    [handleDeleteOpen, handleStatusChange],
   );
 
   const error =
@@ -237,7 +237,7 @@ export function AdminPayments() {
           <LinearProgress />
         </Fade>
       )}
-      <InfiniteLoadingTable columns={columns} rows={payments} loadMore={loadMore} hasMore={hasMore} />
+      <InfiniteLoadingTable columns={columns} rows={payments} loadMore={loadMore}/>
       {dialogOpen && (
         <AdminPaymentsDialog
           handleSubmit={handleDialogSubmit}

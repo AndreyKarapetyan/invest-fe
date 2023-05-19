@@ -11,11 +11,6 @@ export function useGetPayments() {
 
   const getPayments = useCallback(
     (branchName: null | string, isReset = false, search?: string) => {
-      if (isReset) {
-        setSkip(0);
-        setHasMore(true);
-        setData([]);
-      }
       (async function () {
         try {
           setLoading(true);

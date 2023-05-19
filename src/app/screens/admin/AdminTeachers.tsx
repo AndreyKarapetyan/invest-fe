@@ -31,9 +31,9 @@ export function AdminTeachers() {
     [],
   );
 
-  const handleDeleteOpen = (teacherId: number) => {
+  const handleDeleteOpen = useCallback((teacherId: number) => {
     setDeletableTeacher(teacherId);
-  };
+  }, []);
 
   const handleDeleteClose = () => {
     setDeletableTeacher(null);
@@ -44,9 +44,12 @@ export function AdminTeachers() {
     setDeletableTeacher(null);
   };
 
-  const navigateToTeacherPage = (teacher?: any) => {
-    navigate(teacher ? `./${currentBranch}/${teacher.id}` : `./${currentBranch}/new`);
-  };
+  const navigateToTeacherPage = useCallback(
+    (teacher?: any) => {
+      navigate(teacher ? `./${currentBranch}/${teacher.id}` : `./${currentBranch}/new`);
+    },
+    [currentBranch],
+  );
 
   useEffect(() => {
     if (currentBranch) {
@@ -80,8 +83,8 @@ export function AdminTeachers() {
       { label: 'Name', name: 'name', Component: Fragment, withValue: true },
       { label: 'Lastname', name: 'lastname', Component: Fragment, withValue: true },
       {
-        label: '',
-        name: '',
+        label: 'Edit',
+        name: 'edit',
         Component: ({ row }: any) => (
           <Tooltip title="Edit">
             <IconButton onClick={() => navigateToTeacherPage(row)} size="small">
@@ -92,8 +95,8 @@ export function AdminTeachers() {
         withValue: false,
       },
       {
-        label: '',
-        name: '',
+        label: 'delete',
+        name: 'delete',
         Component: ({ row }: any) => (
           <Tooltip title="Delete">
             <IconButton onClick={() => handleDeleteOpen(row.id)} size="small">
@@ -104,14 +107,20 @@ export function AdminTeachers() {
         withValue: false,
       },
     ],
-    [],
+    [handleDeleteOpen, navigateToTeacherPage],
   );
 
   const teachers = allTeachers.filter(
     ({ id, name, lastname }) =>
       id.toString().includes(searchString) ||
-      name.toLowerCase().includes(searchString.toLowerCase()) ||
-      lastname.toLowerCase().includes(searchString.toLowerCase()),
+      `${name} ${lastname}`.toLowerCase().includes(
+        searchString
+          .trim()
+          .split(' ')
+          .filter((s) => s)
+          .join(' ')
+          .toLowerCase(),
+      ),
   );
 
   return (
@@ -154,7 +163,6 @@ export function AdminTeachers() {
         rows={teachers}
         onEdit={navigateToTeacherPage}
         onDelete={handleDeleteOpen}
-        hasMore={false}
       />
       {isTeacherDeleted && <TopCenterSnackbar message="Success" open={isTeacherDeleted} />}
       {deletableTeacher && (

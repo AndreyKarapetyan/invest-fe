@@ -180,7 +180,7 @@ export function AdminStudentDialog({
   return (
     <StyledDialog open={isOpen} onClose={handleClose}>
       <DialogTitle>
-        New Student
+        {studentData.id ? 'Edit' : 'New'} Student
         <IconButton
           aria-label="close"
           onClick={handleClose}
