@@ -8,6 +8,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormHelperText,
   Grid,
   IconButton,
   InputLabel,
@@ -64,6 +65,16 @@ export function EventDialog({
       pattern: null,
     }
   );
+  const [formErrors, setFormErrors] = useState({
+    pattern: false,
+    groupId: false,
+    teacherId: false,
+  });
+  const validationFuncMapping = {
+    teacherId: (teacherId: any) => teacherId,
+    groupId: (groupId: any) => groupId,
+    pattern: (pattern: any) => pattern,
+  };
   const [teacherOptionsOpen, setTeacherOptionsOpen] = useState(false); // For circular progress
   const [groupOptionsOpen, setGroupOptionsOpen] = useState(false);
   const [groupFieldOpen, setGroupFieldOpen] = useState(
@@ -74,6 +85,10 @@ export function EventDialog({
     setEventData((curEventData: any) => ({
       ...curEventData,
       [key]: value,
+    }));
+    setFormErrors((curErrors) => ({
+      ...curErrors,
+      [key]: !validationFuncMapping[key as keyof typeof validationFuncMapping](value),
     }));
   };
   const handleTeacherOpen = () => {
@@ -123,6 +138,20 @@ export function EventDialog({
       value = eventValue;
     }
     handleEventDataChange('pattern', value.join(','));
+  };
+
+  const onSaveChanges = () => {
+    const { teacherId, groupId, pattern } = eventData;
+    const errors: typeof formErrors = {
+      teacherId: !validationFuncMapping.teacherId(teacherId),
+      groupId: !validationFuncMapping.groupId(groupId),
+      pattern: !validationFuncMapping.pattern(pattern),
+    };
+    setFormErrors(errors as any);
+    const areErrors = Object.values(errors).some((err) => err);
+    if (!areErrors) {
+      handleSubmitStart(eventData);
+    }
   };
 
   useEffect(() => {
@@ -178,6 +207,9 @@ export function EventDialog({
               <TextField
                 {...params}
                 label="Teacher"
+                required
+                error={formErrors.teacherId}
+                helperText={formErrors.teacherId ? 'Teacher must not be empty' : ''}
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
@@ -204,6 +236,9 @@ export function EventDialog({
               <TextField
                 {...params}
                 label="Group"
+                required
+                error={formErrors.groupId}
+                helperText={formErrors.groupId ? 'Group must not be empty' : ''}
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
@@ -219,6 +254,7 @@ export function EventDialog({
             )}
           />
           <StyledCheckBoxFormControl
+            required
             control={
               <Checkbox
                 checked={isOncePattern}
@@ -228,12 +264,14 @@ export function EventDialog({
             label={optionOnce.name}
           />
           <StyledFormControl>
-            <InputLabel id="multiple-select-weekday">Repeat</InputLabel>
+            <InputLabel required id="multiple-select-weekday">Repeat</InputLabel>
             <Select
               label="Repeat"
               labelId="multiple-select-weekday"
               id="select-multiple"
               multiple
+              required
+              error={formErrors.pattern}
               disabled={isOncePattern}
               value={
                 (!isOncePattern &&
@@ -263,6 +301,7 @@ export function EventDialog({
                 </MenuItem>
               ))}
             </Select>
+            {formErrors.pattern && <FormHelperText error>Pattern must not be empty</FormHelperText>}
           </StyledFormControl>
         </Grid>
       </DialogContent>
@@ -277,7 +316,7 @@ export function EventDialog({
         ) : (
           <Box />
         )}
-        <Button autoFocus onClick={handleSubmitStart}>
+        <Button autoFocus onClick={onSaveChanges}>
           Save Changes
         </Button>
       </DialogActions>
