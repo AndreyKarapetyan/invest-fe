@@ -77,17 +77,23 @@ export function Calendar({
 
   const handleMouseUp = useCallback(() => {
     if (isSelecting) {
+      setSelectedStart(convertToMinutes(selectedStart!) < convertToMinutes(selectedEnd!) ? selectedStart : selectedEnd);
+      setSelectedEnd(convertToMinutes(selectedEnd!) > convertToMinutes(selectedStart!) ? selectedEnd : selectedStart);
       setIsSelecting(false);
       handleDialogOpen();
     }
-  }, [isSelecting]);
+  }, [isSelecting, selectedEnd, selectedStart]);
 
   const handleMouseEnter = useCallback(
     (_: any, { hour, minute }: TimeSlot) => {
       if (isSelecting) {
-        const selectedTime = convertToMinutes(times[`${hour} ${minute}`]);
+        let selectedTime = convertToMinutes(times[`${hour} ${minute}`]);
+        let timeSlot = { hour, minute };
         const startTime = convertToMinutes(selectedStart!);
-        const timeSlot = selectedTime < startTime ? getPrevTimeSlot({ hour, minute }) : { hour, minute };
+        if (selectedTime < startTime) {
+          timeSlot = getPrevTimeSlot(timeSlot);
+          selectedTime = convertToMinutes(timeSlot);
+        }
         const isEventInSelectionRange = events.some(
           ({ start, end, roomId }: any) =>
             selectedRoom === roomId &&
