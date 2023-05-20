@@ -1,6 +1,6 @@
 import { AdminMenuSliderList } from './AdminMenuSliderList';
 import { getAuth } from 'src/app/utils/auth';
-import { LOGIN_ROUTE } from 'src/app/routeNames';
+import { LOGIN_ROUTE, NOT_FOUND_ROUTE } from 'src/app/routeNames';
 import { MenuSlider } from '../MenuSlider/MenuSlider';
 import { Role } from 'src/app/types/role';
 import { useEffect } from 'react';
@@ -16,7 +16,7 @@ export function SuperAdminRoute({ children }: any) {
     if (!role) {
       navigate(LOGIN_ROUTE);
     } else if (role !== Role.SuperAdmin) {
-      navigate('NotFound');
+      navigate(NOT_FOUND_ROUTE);
     }
   }, []);
 

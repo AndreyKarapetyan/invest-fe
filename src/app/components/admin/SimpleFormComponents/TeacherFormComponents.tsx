@@ -4,11 +4,17 @@ import { VisibilityOff, Visibility, Error } from '@mui/icons-material';
 import { InputLabel, Select, MenuItem, OutlinedInput, InputAdornment, IconButton, FormHelperText } from '@mui/material';
 import { TeacherLevel } from 'src/app/types/teacher';
 
-export const TeacherFormComponents = memo(function TeacherFormComponents({ teacherData, onInputChange, formErrors }: any) {
+export const TeacherFormComponents = memo(function TeacherFormComponents({
+  teacherData,
+  onInputChange,
+  formErrors,
+}: any) {
   const [showPassword, setShowPassword] = useState(false);
+
   const handleShowPassword = () => {
     setShowPassword((cur) => !cur);
   };
+
   return (
     <Fragment>
       <StyledTextField
@@ -52,7 +58,9 @@ export const TeacherFormComponents = memo(function TeacherFormComponents({ teach
         onChange={onInputChange}
       />
       <StyledFormControl>
-        <InputLabel id="level-label" required>Level</InputLabel>
+        <InputLabel id="level-label" required>
+          Level
+        </InputLabel>
         <Select
           labelId="level-label"
           name="level"
@@ -81,12 +89,12 @@ export const TeacherFormComponents = memo(function TeacherFormComponents({ teach
         onChange={onInputChange}
       />
       <StyledFormControl variant="outlined">
-        <InputLabel required error={formErrors.password} htmlFor="outlined-adornment-password">
-          Password
+        <InputLabel error={formErrors.password} htmlFor="outlined-adornment-password">
+          New Password
         </InputLabel>
         <OutlinedInput
           id="outlined-adornment-password"
-          label="Password"
+          label="New Password"
           name="password"
           type={showPassword ? 'text' : 'password'}
           value={teacherData.password}

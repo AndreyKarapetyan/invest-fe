@@ -12,6 +12,7 @@ import { useCreateTeacher, useGetTeacher, useUpdateTeacher } from './hooks/teach
 import { useErrorBoundary } from 'react-error-boundary';
 import { useGetAllStudentsMinData, useGetStudents } from './hooks/student';
 import { useNavigate, useParams } from 'react-router-dom';
+import { NOT_FOUND_ROUTE, TEACHERS_LIST_ROUTE } from 'src/app/routeNames';
 
 export function AdminTeacher(props: any) {
   const { branchName, teacherId } = useParams();
@@ -46,7 +47,8 @@ export function AdminTeacher(props: any) {
     name: (name: any) => name,
     lastname: (lastname: any) => lastname,
     email: (email: any) => isEmail(email),
-    password: (password: any) => isStrongPassword(password),
+    password: (password: any) =>
+      teacherId === 'new' ? isStrongPassword(password) : !password || isStrongPassword(password),
     level: (level: any) => Object.values(TeacherLevel).includes(level),
     phoneNumber: (phoneNumber: any) => phoneNumber,
     salaryPercent: (salaryPercent: any) => salaryPercent && isPositive(Number(salaryPercent)),
@@ -59,9 +61,10 @@ export function AdminTeacher(props: any) {
   const { isTeacherUpdated, resetTeacherUpdateSuccess, teacherUpdateError, teacherUpdateLoading, updateTeacher } =
     useUpdateTeacher();
   const { showBoundary } = useErrorBoundary();
+  const error = teacherError || studentsError || teacherCreateError || teacherUpdateError;
 
   const goBackToTheList = () => {
-    navigate('/teachers');
+    navigate(TEACHERS_LIST_ROUTE);
   };
 
   // const loadMore = useCallback(() => {
@@ -118,6 +121,8 @@ export function AdminTeacher(props: any) {
     const id = Number(teacherId);
     if (!isNaN(id) && id > 0) {
       getTeacher(id);
+    } else if (teacherId !== 'new') {
+      navigate(NOT_FOUND_ROUTE, { replace: true });
     }
   }, [teacherId]);
 
@@ -125,6 +130,7 @@ export function AdminTeacher(props: any) {
     if (teacher) {
       setTeacherData({
         ...teacher,
+        password: '',
         groups: {
           ...teacher.groups,
           studentList: {
@@ -139,12 +145,17 @@ export function AdminTeacher(props: any) {
   useEffect(() => {
     if (branchName) {
       getAllStudentsMinData({ branchName });
+    } else {
+      navigate(NOT_FOUND_ROUTE, { replace: true });
     }
   }, [branchName]);
 
   useEffect(() => {
     if (shouldSubmit) {
       const data = deepClone(teacherData);
+      if (!data.password) {
+        delete (data as any).password;
+      }
       const groups = Object.values(data.groups).filter(({ id }) => id !== 'studentList');
       if (teacherId === 'new') {
         const submissionData = {
@@ -183,7 +194,13 @@ export function AdminTeacher(props: any) {
     }
   }, [isTeacherUpdated]);
 
-  const error = teacherError || studentsError || teacherCreateError || teacherUpdateError;
+  useEffect(() => {
+    if ((error as any)?.response?.status === 404) {
+      navigate(NOT_FOUND_ROUTE, { replace: true });
+    } else if (error) {
+      showBoundary(error);
+    }
+  }, [error]);
 
   return teacherLoading || // @TODO: Do as in AdminStudents
     teacherCreateLoading ||
@@ -248,7 +265,6 @@ export function AdminTeacher(props: any) {
           cancelSubmit={cancelSubmit}
         />
       </Grid>
-      {error && showBoundary(error)}
     </Box>
   );
 }
