@@ -25,7 +25,6 @@ export function ScheduleTable({
   isSelected,
   getEventHeight,
   handleMouseDown,
-  handleMouseUp,
   handleEventClick,
 }: any) {
   return (
@@ -165,7 +164,7 @@ export function ScheduleTable({
                     roomId={room.id}
                     timeSlot={timeSlot}
                     handleMouseDown={handleMouseDown}
-                    handleMouseUp={handleMouseUp}
+                    // handleMouseUp={handleMouseUp}
                     handleMouseEnter={handleMouseEnter}
                     isSelected={isSelected(room.id, timeSlot)}
                   />

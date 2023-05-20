@@ -5,7 +5,6 @@ export function EventSelection({
   roomId,
   timeSlot,
   handleMouseDown,
-  handleMouseUp,
   handleMouseEnter,
   isSelected,
 }: any) {
@@ -20,7 +19,6 @@ export function EventSelection({
         backgroundColor: isSelected ? 'rgba(0, 0, 255, 0.1)' : 'transparent',
       }}
       onMouseDown={() => handleMouseDown(roomId, timeSlot)}
-      onMouseUp={handleMouseUp}
       onMouseEnter={() => handleMouseEnter(roomId, getNextTimeSlot(timeSlot))}
     />
   );

@@ -1,11 +1,5 @@
 import { Box, TableContainer } from '@mui/material';
-import {
-  convertToMinutes,
-  generateTimeSlots,
-  getNextTimeSlot,
-  getPrevTimeSlot,
-  TimeSlot,
-} from './utils';
+import { convertToMinutes, generateTimeSlots, getNextTimeSlot, getPrevTimeSlot, TimeSlot } from './utils';
 import { DatePicker } from './DatePicker';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { ScheduleTable } from './ScheduleTable';
@@ -54,16 +48,32 @@ export function Calendar({
     setSelectedEnd(timeSlot);
   };
 
-  const handleMouseDown = useCallback((roomId: any, timeSlot: any) => {
-    const eventAtCurrentPosition = getEventAtPosition(roomId, timeSlot);
-    if (eventAtCurrentPosition) {
-      return;
-    }
-    setIsSelecting(true);
-    setSelectedRoom(roomId);
-    setSelectedStart(timeSlot);
-    setSelectedEnd(timeSlot);
-  }, []);
+  const getEventAtPosition = useCallback(
+    (roomId: number, timeSlot: TimeSlot) => {
+      const selectedTime = convertToMinutes(timeSlot);
+      return events.find(
+        ({ start, end, roomId: eventRoomId }: any) =>
+          eventRoomId === roomId &&
+          selectedTime >= convertToMinutes({ hour: start.hour, minute: start.minute }) &&
+          selectedTime < convertToMinutes({ hour: end.hour, minute: end.minute }),
+      );
+    },
+    [events],
+  );
+
+  const handleMouseDown = useCallback(
+    (roomId: any, timeSlot: any) => {
+      const eventAtCurrentPosition = getEventAtPosition(roomId, timeSlot);
+      if (eventAtCurrentPosition) {
+        return;
+      }
+      setIsSelecting(true);
+      setSelectedRoom(roomId);
+      setSelectedStart(timeSlot);
+      setSelectedEnd(timeSlot);
+    },
+    [events, getEventAtPosition],
+  );
 
   const handleMouseUp = useCallback(() => {
     if (isSelecting) {
@@ -77,31 +87,25 @@ export function Calendar({
       if (isSelecting) {
         const selectedTime = convertToMinutes(times[`${hour} ${minute}`]);
         const startTime = convertToMinutes(selectedStart!);
-        const timeSlot =
-          selectedTime < startTime
-            ? getPrevTimeSlot({ hour, minute })
-            : { hour, minute };
+        const timeSlot = selectedTime < startTime ? getPrevTimeSlot({ hour, minute }) : { hour, minute };
         const isEventInSelectionRange = events.some(
           ({ start, end, roomId }: any) =>
             selectedRoom === roomId &&
-            ((Math.min(startTime, selectedTime) <
-              convertToMinutes({ hour: start.hour, minute: start.minute }) &&
+            ((Math.min(startTime, selectedTime) < convertToMinutes({ hour: start.hour, minute: start.minute }) &&
               Math.max(startTime, selectedTime) >
                 convertToMinutes({
                   hour: start.hour,
                   minute: start.minute,
                 })) ||
-              (Math.min(startTime, selectedTime) <
-                convertToMinutes({ hour: end.hour, minute: end.minute }) &&
-                Math.max(startTime, selectedTime) >
-                  convertToMinutes({ hour: end.hour, minute: end.minute })))
+              (Math.min(startTime, selectedTime) < convertToMinutes({ hour: end.hour, minute: end.minute }) &&
+                Math.max(startTime, selectedTime) > convertToMinutes({ hour: end.hour, minute: end.minute }))),
         );
         if (!isEventInSelectionRange) {
           setSelectedEnd(timeSlot);
         }
       }
     },
-    [isSelecting, selectedRoom]
+    [events, isSelecting, selectedRoom, selectedStart, times],
   );
 
   const isSelected = useCallback(
@@ -110,29 +114,11 @@ export function Calendar({
         const selectedTime = convertToMinutes(timeSlot);
         const startTime = convertToMinutes(selectedStart!);
         const endTime = convertToMinutes(selectedEnd!);
-        return (
-          selectedTime >= Math.min(startTime, endTime) &&
-          selectedTime < Math.max(startTime, endTime)
-        );
+        return selectedTime >= Math.min(startTime, endTime) && selectedTime < Math.max(startTime, endTime);
       }
       return false;
     },
-    [selectedRoom, selectedStart, selectedEnd, isSelecting]
-  );
-
-  const getEventAtPosition = useCallback(
-    (roomId: number, timeSlot: TimeSlot) => {
-      const selectedTime = convertToMinutes(timeSlot);
-      return events.find(
-        ({ start, end, roomId: eventRoomId }: any) =>
-          eventRoomId === roomId &&
-          selectedTime >=
-            convertToMinutes({ hour: start.hour, minute: start.minute }) &&
-          selectedTime <
-            convertToMinutes({ hour: end.hour, minute: end.minute })
-      );
-    },
-    [events]
+    [selectedRoom, selectedStart, selectedEnd, isSelecting],
   );
 
   const getEventHeight = useCallback(
@@ -144,14 +130,21 @@ export function Calendar({
       end: {
         hour: number;
         minute: number;
-      }
+      },
     ) => {
       const startTime = convertToMinutes(start);
       const endTime = convertToMinutes(end);
       return ((endTime - startTime) * 100) / 15;
     },
-    []
+    [],
   );
+
+  useEffect(() => {
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseUp]);
 
   useEffect(() => {
     if (shouldUpdateSubmissionData.slots) {
@@ -168,12 +161,7 @@ export function Calendar({
   }, [shouldUpdateSubmissionData]);
 
   useEffect(() => {
-    if (
-      event &&
-      event.start &&
-      event.end &&
-      !shouldUpdateSubmissionData.startedSubmitProcess
-    ) {
+    if (event && event.start && event.end && !shouldUpdateSubmissionData.startedSubmitProcess) {
       setSelectedStart(event.start);
       setSelectedEnd(event.end);
     }
@@ -201,7 +189,6 @@ export function Calendar({
           isSelected={isSelected}
           getEventHeight={getEventHeight}
           handleMouseDown={handleMouseDown}
-          handleMouseUp={handleMouseUp}
           handleEventClick={handleDialogOpen}
         />
       </TableContainer>
@@ -261,7 +248,7 @@ export function Calendar({
               shouldUpdateSubmissionData.startedSubmitProcess &&
                 event.id &&
                 !shouldUpdateSubmissionData.changeModeConfirmed &&
-                event.pattern !== 'once'
+                event.pattern !== 'once',
             )}
           />
         )}
