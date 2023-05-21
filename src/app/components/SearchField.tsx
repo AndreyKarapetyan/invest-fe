@@ -9,6 +9,7 @@ import {
 export const SearchField = styled((props: TextFieldProps) => (
   <TextField
     {...props}
+    autoComplete="off"
     placeholder="Search..."
     variant="outlined"
     InputProps={{

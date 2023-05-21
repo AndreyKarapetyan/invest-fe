@@ -58,6 +58,7 @@ export function TeacherGroup({
           </Grid>
           <TextField
             sx={{ maxWidth: '400px' }}
+            autoComplete="off"
             variant="standard"
             label="Group Name"
             name="groupName"

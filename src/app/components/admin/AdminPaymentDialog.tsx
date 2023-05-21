@@ -182,6 +182,7 @@ export function AdminPaymentsDialog({
             renderInput={(params) => (
               <TextField
                 {...params}
+                autoComplete="off"
                 label="Teacher"
                 InputProps={{
                   ...params.InputProps,
@@ -206,6 +207,7 @@ export function AdminPaymentsDialog({
             renderInput={(params) => (
               <TextField
                 {...params}
+                autoComplete="off"
                 label="Group Name"
                 InputProps={{
                   ...params.InputProps,
@@ -230,6 +232,7 @@ export function AdminPaymentsDialog({
             renderInput={(params) => (
               <TextField
                 {...params}
+                autoComplete="off"
                 label="Student"
                 required
                 error={formErrors.studentId}
@@ -248,6 +251,7 @@ export function AdminPaymentsDialog({
           />
           <StyledTextField
             name="amount"
+            autoComplete="off"
             label="Payment Amount"
             value={paymentData.amount}
             variant="outlined"

@@ -199,6 +199,7 @@ export function AdminStudentDialog({
           <StyledTextField
             name="name"
             label="Name"
+            autoComplete="off"
             value={studentData.name}
             variant="outlined"
             required
@@ -209,6 +210,7 @@ export function AdminStudentDialog({
           <StyledTextField
             name="lastname"
             label="Lastname"
+            autoComplete="off"
             value={studentData.lastname}
             variant="outlined"
             required
@@ -219,6 +221,7 @@ export function AdminStudentDialog({
           <StyledTextField
             name="formalFee"
             label="Formal Fee"
+            autoComplete="off"
             value={studentData.formalFee}
             variant="outlined"
             required
@@ -229,6 +232,7 @@ export function AdminStudentDialog({
           <StyledTextField
             name="actualFee"
             label="Actual Fee"
+            autoComplete="off"
             value={studentData.actualFee}
             variant="outlined"
             required
@@ -239,6 +243,7 @@ export function AdminStudentDialog({
           <StyledTextField
             name="email"
             label="Email"
+            autoComplete="off"
             value={studentData.email}
             variant="outlined"
             error={formErrors.email}
@@ -269,6 +274,7 @@ export function AdminStudentDialog({
             renderInput={(params) => (
               <TextField
                 {...params}
+                autoComplete="off"
                 label="Teacher"
                 error={formErrors.teacherId}
                 helperText={formErrors.teacherId ? 'Please either create a new group or select existing' : ''}
@@ -307,6 +313,7 @@ export function AdminStudentDialog({
               <StyledTextField
                 name="groupName"
                 label="New Group Name"
+                autoComplete="off"
                 variant="outlined"
                 required
                 error={formErrors.groupName}
@@ -325,6 +332,7 @@ export function AdminStudentDialog({
                 renderInput={(params) => (
                   <TextField
                     {...params}
+                    autoComplete="off"
                     label="Existing Group Name"
                     error={formErrors.groupId}
                     helperText={formErrors.groupId ? 'Group must not be empty' : ''}

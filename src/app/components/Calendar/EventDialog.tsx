@@ -206,6 +206,7 @@ export function EventDialog({
             renderInput={(params) => (
               <TextField
                 {...params}
+                autoComplete="off"
                 label="Teacher"
                 required
                 error={formErrors.teacherId}
@@ -235,6 +236,7 @@ export function EventDialog({
             renderInput={(params) => (
               <TextField
                 {...params}
+                autoComplete="off"
                 label="Group"
                 required
                 error={formErrors.groupId}

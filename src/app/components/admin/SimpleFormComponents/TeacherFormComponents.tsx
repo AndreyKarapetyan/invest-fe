@@ -20,6 +20,7 @@ export const TeacherFormComponents = memo(function TeacherFormComponents({
       <StyledTextField
         name="name"
         label="Name"
+        autoComplete="off"
         value={teacherData.name}
         variant="outlined"
         required
@@ -30,6 +31,7 @@ export const TeacherFormComponents = memo(function TeacherFormComponents({
       <StyledTextField
         name="lastname"
         label="Lastname"
+        autoComplete="off"
         value={teacherData.lastname}
         variant="outlined"
         required
@@ -40,6 +42,7 @@ export const TeacherFormComponents = memo(function TeacherFormComponents({
       <StyledTextField
         name="email"
         label="Email"
+        autoComplete="off"
         value={teacherData.email}
         variant="outlined"
         required
@@ -50,6 +53,7 @@ export const TeacherFormComponents = memo(function TeacherFormComponents({
       <StyledTextField
         name="phoneNumber"
         label="Phone Number"
+        autoComplete="off"
         value={teacherData.phoneNumber}
         variant="outlined"
         required
@@ -81,6 +85,7 @@ export const TeacherFormComponents = memo(function TeacherFormComponents({
       <StyledTextField
         name="salaryPercent"
         label="Salary Percents"
+        autoComplete="off"
         value={teacherData.salaryPercent}
         variant="outlined"
         required

@@ -80,6 +80,7 @@ export function Login() {
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
           <TextField
             margin="normal"
+            autoComplete="off"
             required
             error={isValidationError}
             fullWidth
@@ -91,6 +92,7 @@ export function Login() {
           />
           <TextField
             margin="normal"
+            autoComplete="off"
             required
             error={isValidationError}
             helperText={isValidationError ? 'Incorrect email or password' : ''}
